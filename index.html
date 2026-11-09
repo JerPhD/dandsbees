@@ -1,0 +1,864 @@
+---
+---
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="format-detection" content="telephone=no, email=no, address=no">
+<title>Dan D's Bees · Raw wildflower honey, San Francisco</title>
+<link rel="icon" href="images/favicon.png">
+<meta name="description" content="Raw wildflower honey from San Francisco hives. Swarm calls, hive removal, school visits and beekeeping classes with Dan D.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Karla:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f3eada; --ink:#2a2622; --ink2:rgba(42,38,34,.8); --ink3:rgba(42,38,34,.55); --rule:rgba(42,38,34,.14);
+  --honey:#dea42e; --pill-bg:rgba(243,234,218,.88); --pill-h:30px;
+  --fd:'Cormorant Garamond',serif; --ft:'EB Garamond',serif; --fu:'Karla',sans-serif; --dw:600; --dk:1.08;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{overscroll-behavior-y:none}
+/* the paper never moves: it sits behind everything, fixed */
+body{background:var(--paper);color:var(--ink);font-family:var(--ft);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body::before{content:'';position:fixed;inset:0;z-index:-2;background:var(--paper) url(images/paper.jpg) repeat;background-size:900px auto;pointer-events:none}
+a{color:inherit}
+img{-webkit-user-drag:none;user-select:none}
+body.smoking,body.smoking *{-webkit-user-select:none;user-select:none}
+.room.swarm{-webkit-user-select:none;user-select:none}
+::selection{background:var(--ink);color:var(--paper)}
+
+/* ---------- one control system: every control is the same pill ---------- */
+.pill,.btn,#tabs{border-radius:999px;background:var(--pill-bg);box-shadow:0 6px 18px rgba(42,38,34,.07)}
+.btn{display:inline-flex;align-items:center;height:var(--pill-h);border:0;color:var(--ink);font:500 11px/1 var(--fu);letter-spacing:.14em;text-transform:uppercase;padding:0 13px;cursor:pointer;transition:background .35s,color .35s}
+@media (hover:hover){ .btn:hover{background:rgba(42,38,34,.08)} }
+.btn[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+
+/* ---------- cursors ---------- */
+@media (pointer:fine){ body.beecursor, body.beecursor *{cursor:none!important} }
+#cursor,#smoker{position:fixed;left:0;top:0;z-index:210;pointer-events:none;will-change:transform;display:none}
+body.beecursor #cursor,body.beecursor #smoker{display:block}
+#cursor{width:58px}
+#cursor .c,#smoker .c{transition:opacity .35s cubic-bezier(.2,.7,.2,1),transform .35s cubic-bezier(.2,.7,.2,1)}
+#cursor img{display:block;width:100%;max-width:none}
+#cursor.hot .c{transform:scale(1.25)}
+#smoker{width:0;height:0}
+#smoker .c{position:absolute;left:0;top:0;opacity:0;transform:scale(.55);transform-origin:0 0}
+#smoker .turn{position:absolute;left:0;top:0;width:0;height:0;transform-origin:0 0;transform-style:preserve-3d}
+#smoker img{max-width:none;position:absolute;backface-visibility:visible;display:block;width:140px;left:-133px;top:-2px;transform-origin:30% 60%}
+body.smoking #cursor .c{opacity:0;transform:scale(.5)}
+body.smoking #smoker .c{opacity:1;transform:scale(1)}
+
+/* the live-bee + smoke layer floats over the whole page, so smoke can rise past a section edge */
+#fx{position:fixed;inset:0;width:100%;height:100%;z-index:60;pointer-events:none}
+
+/* ---------- the meadow ---------- */
+#meadow{position:relative}
+.stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden}
+#ink,#inkf,#mfx{position:absolute;inset:0;width:100%;height:100%;display:block}
+#mfx{z-index:1;pointer-events:none}
+#inkf{z-index:3;pointer-events:none}
+#name{opacity:0;position:absolute;left:0;right:0;top:13.5vh;text-align:center;pointer-events:none;will-change:transform,opacity,filter}
+#name h1{font-family:var(--fd);font-weight:var(--dw);font-size:calc(min(10.5vw,19vh) * var(--dk));line-height:.92;letter-spacing:-.01em;color:var(--ink)}
+#name p{max-width:none;margin:3.4vh auto 0;font-family:var(--fu);font-size:clamp(14px,1.05vw,19px);letter-spacing:.28em;text-transform:uppercase;color:var(--ink2)}
+.phrase{opacity:0;position:absolute;left:0;top:0;font-family:var(--ft);font-style:italic;color:var(--ink);will-change:transform,opacity,filter;white-space:nowrap;font-size:clamp(24px,3vw,42px);line-height:1.15;pointer-events:none}
+.phrase small{display:block;font-family:var(--fu);font-style:normal;font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--ink2);margin-bottom:14px}
+#hound{opacity:0;position:absolute;left:0;top:0;z-index:2;pointer-events:none;will-change:transform,opacity;transform-origin:50% 90%}
+#hound{background:url(images/dog-walking-backing.png) 0 0/100% auto no-repeat}   /* a paper-coloured silhouette so the hive never shows through his pale fur */
+#hound img{display:block;width:100%;-webkit-mask-image:linear-gradient(#000 74%,transparent 96%);mask-image:linear-gradient(#000 74%,transparent 96%)}
+#mbee{opacity:0;position:absolute;left:0;top:0;z-index:4;width:58px;pointer-events:none;will-change:transform}
+#mbee img{display:block;width:100%}
+.hint{opacity:0;position:absolute;right:5vw;top:44vh;z-index:5;font-family:var(--fu);font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--ink2);display:flex;gap:12px;align-items:center;will-change:opacity,filter,translate}
+.hint b{display:inline-block;width:46px;height:1px;background:currentColor;animation:nudge 2.4s ease-in-out infinite}
+@keyframes nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(10px)}}
+
+/* ---------- corner ---------- */
+.corner{position:fixed;left:24px;top:22px;z-index:70;display:flex;flex-direction:column;align-items:flex-start;gap:10px}
+.mark{font-family:var(--ft);font-style:italic;font-size:16px;text-decoration:none;color:var(--ink);padding-left:4px}
+.mark b{font-family:var(--fd);font-style:normal;font-weight:var(--dw)}
+
+
+/* ---------- nav: plain words, half the height, no outline ---------- */
+#tabs{position:fixed;left:50%;bottom:calc(44px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:72;display:flex;gap:4px;padding:7px;align-items:center}
+#tabs a{position:relative;display:flex;align-items:center;height:34px;padding:0 17px;border-radius:999px;font:500 15px/1 var(--fu);color:var(--ink2);text-decoration:none;white-space:nowrap;transition:background .35s cubic-bezier(.2,.7,.2,1),color .35s}
+#tabs a:focus-visible{background:rgba(42,38,34,.07);color:var(--ink);outline:none}
+#tabs a:focus-visible{box-shadow:0 0 0 2px var(--honey)}
+@media (hover:hover){ #tabs a:hover{background:rgba(42,38,34,.07);color:var(--ink)} }
+#tabs a.here{background:var(--ink);color:var(--paper)}
+#tabbee{position:absolute;left:0;top:-26px;width:26px;pointer-events:none;will-change:transform;transition:opacity .5s}
+#tabbee img{width:100%;display:block}
+
+/* ---------- down the page ---------- */
+#rooms{position:relative;overflow-x:clip}
+#rooms::before{content:'';position:absolute;left:0;right:0;top:0;bottom:0;z-index:-1;pointer-events:none;transition:background .6s}
+.room{position:relative;min-height:100vh;display:grid;grid-template-columns:minmax(0,620px) minmax(0,620px);justify-content:center;gap:clamp(48px,6vw,140px);align-items:center;padding:14vh clamp(24px,5vw,90px) 12vh;max-width:1500px;margin:0 auto}
+.room.flip > .art{order:-1}
+.wash{position:absolute;pointer-events:none;z-index:0;opacity:0;transition:opacity 1s}
+.eyebrow{font-family:var(--fu);font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--ink2);margin-bottom:20px}
+h2{font-family:var(--fd);font-weight:var(--dw);font-size:calc(clamp(42px,4.8vw,80px) * var(--dk));line-height:.9;margin-bottom:26px;text-wrap:balance}
+h2 em{font-family:var(--ft);font-style:italic;font-weight:400}
+p{font-size:clamp(18px,1.35vw,21px);line-height:1.6;color:var(--ink2);max-width:30em;text-wrap:pretty}
+p + p{margin-top:14px}
+.quiet{font-style:italic;color:var(--ink)}
+.cta{display:inline-block;margin-top:26px;font-family:var(--fu);font-weight:500;font-size:19px;color:var(--ink);background:linear-gradient(transparent 58%,rgba(222,164,46,.42) 58%,rgba(222,164,46,.42) 92%,transparent 92%);padding:0 3px;margin-left:-3px}
+.honey-em{color:var(--honey)}
+/* one way to reach Dan: the link opens mail, the address is always shown and copies on a click */
+.ask{margin-top:38px;display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+.ask .cta{margin-top:0}
+.ask .note{font-family:var(--fu);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink2)}
+.addr{-webkit-tap-highlight-color:transparent;display:inline-flex;flex-direction:column;align-items:flex-start;gap:10px;border:0;background:none;padding:4px 0;font:italic 17px/1.2 var(--ft);color:var(--ink2);cursor:pointer}
+.addr .cp{font:500 10px/1 var(--fu);font-style:normal;letter-spacing:.18em;text-transform:uppercase;padding:7px 11px;border-radius:999px;background:var(--ink);color:var(--paper);transition:background .3s,color .3s}
+.addr:hover .cp,.addr:focus-visible .cp{background:#000;color:var(--paper)}
+.addr:focus-visible{outline:none}
+.addr.ok .cp{background:var(--honey);color:var(--ink)}
+.addr.big{margin-top:18px}
+.addr.swap .cp{display:grid;place-items:center;text-transform:none;letter-spacing:.03em;font:500 15px/1 var(--fu);padding:0 20px;height:44px}
+.addr.swap .cp>span{grid-area:1/1;transition:opacity .45s cubic-bezier(.4,0,.2,1)}
+.addr.swap .b{opacity:0}
+@media (hover:hover){ .addr.swap:hover .a,.addr.swap:focus-visible .a{opacity:0} .addr.swap:hover .b,.addr.swap:focus-visible .b{opacity:1} }
+.addr.swap.ok .a{opacity:0} .addr.swap.ok .b{opacity:1}
+.addr.big .cp{font:500 15px/1 var(--fu);letter-spacing:.03em;text-transform:none;padding:0 22px;height:44px;display:inline-flex;align-items:center}
+.art{position:relative;justify-self:center;width:100%;z-index:1}
+.art img{display:block;width:100%;height:auto}
+/* illustrations ink in through a wet blot */
+/* the blot alone never goes fully solid (its wash is ~half see-through), so a second layer fills in
+   underneath while it spreads; by the time the mask is removed nothing changes, so there is no pop */
+@property --solid{syntax:'<number>';inherits:false;initial-value:0}
+.inkin{--solid:0;-webkit-mask-image:url(images/ink-splash-1.webp),linear-gradient(rgba(0,0,0,var(--solid)),rgba(0,0,0,var(--solid)));mask-image:url(images/ink-splash-1.webp),linear-gradient(rgba(0,0,0,var(--solid)),rgba(0,0,0,var(--solid)));
+  -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:50% 55%,0 0;mask-position:50% 55%,0 0;
+  -webkit-mask-size:0% 0%,100% 100%;mask-size:0% 0%,100% 100%;
+  transition:-webkit-mask-size 2.4s cubic-bezier(.3,.6,.2,1),mask-size 2.4s cubic-bezier(.3,.6,.2,1),--solid 1.5s ease-in-out .7s}
+.inkin.in{--solid:1;-webkit-mask-size:520% 520%,100% 100%;mask-size:520% 520%,100% 100%}
+.inkin.done{-webkit-mask-image:none;mask-image:none}
+.soft{opacity:0;transition:opacity .9s cubic-bezier(.2,.7,.2,1)}
+.soft.in{opacity:1}
+.cap{margin-top:10px;font-style:italic;font-size:14px;color:var(--ink3);text-align:center}
+.splash{position:absolute;pointer-events:none;opacity:0;transform:scale(.4) rotate(var(--r,0deg));transition:opacity 1.2s,transform 1.8s cubic-bezier(.2,.7,.2,1);z-index:0}
+.splash.in{opacity:var(--o,.55);transform:scale(1) rotate(var(--r,0deg))}
+
+/* honey: the label sits on the jar */
+.jarwrap{max-width:530px;justify-self:start;margin-left:-24px}
+.jarlabel{position:absolute;left:0;top:0;width:300px;height:330px;transform-origin:0 0;background:#f6efe2 url(images/paper.jpg);background-size:420px;border-radius:2px;
+  box-shadow:0 0 0 .6px rgba(42,38,34,.22),inset 0 0 22px rgba(201,138,20,.12);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:50px 8px 20px;
+  text-align:center;opacity:0;transition:opacity 1s .5s;pointer-events:none}
+.jarwrap .inkin.in ~ .jarlabel{opacity:.95}
+body.still .jarlabel{opacity:.95}
+.jarlabel img{width:100%;height:auto;display:block}
+.jarlabel b{display:block;font-family:var(--fd);font-weight:var(--dw);font-size:40px;line-height:.95;color:var(--ink);white-space:nowrap;margin-top:10px}
+.jarlabel i{display:block;font-family:var(--fu);font-style:normal;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink2);white-space:nowrap;margin-top:7px}
+.jarlabel s{display:block;text-decoration:none;font-family:var(--fu);font-size:9px;letter-spacing:.24em;text-transform:uppercase;color:var(--ink3);white-space:nowrap;margin-top:5px}
+.jarlabel u{display:block;text-decoration:none;font-family:var(--ft);font-style:italic;font-size:12px;color:var(--ink3);margin-top:16px;line-height:1.35}
+.jarlabel u em{display:block;font-style:normal;font-family:var(--fu);font-size:8.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink2)}
+
+.room.swarm{grid-template-columns:minmax(0,600px) minmax(0,640px)}
+.swarmart{max-width:520px;justify-self:start}
+.swarmart img{transform-origin:50% 8%;animation:breathe 7s ease-in-out infinite}
+@keyframes breathe{0%,100%{transform:scale(1,1)}50%{transform:scale(1.003,1.006)}}
+.smoke-hint{font-style:italic;font-size:17px;color:var(--ink);margin-top:22px}
+#honey p{max-width:21.5em}   /* 'a little different' drops to the second line */
+
+.room.events{grid-template-columns:minmax(0,2fr) minmax(0,3fr)}
+.events .art{max-width:760px}
+/* laptops: Honey and Events hold their words further in from the left edge */
+@media (min-width:761px){ .room.honey,.room.events{padding-left:clamp(24px,12vw,190px)} .events .art{top:-7vh;left:-3vw} }
+.evpop{position:absolute;pointer-events:none;z-index:0;opacity:0;transition:opacity 1.2s}
+.evpop.in{opacity:1}
+
+/* about: the hound by the hive, and Dan's own prints */
+.room.about{grid-template-columns:minmax(0,600px) minmax(0,640px)}   /* same columns as Swarms, so the two line up */
+.about .art{max-width:none;width:calc(100% + min(168px,8vw) + 50px);margin-left:calc(-1 * min(168px,8vw));justify-self:start}   /* reaches out into the left margin; keeps ~90px before the text */
+.jarlabel img{mix-blend-mode:multiply}   /* the label art is on white, so it melts into the label paper */
+.prints{display:flex;gap:22px;margin-top:28px;align-items:flex-start}
+.print{display:block;width:220px;background:#fbf7ee;padding:10px 10px 32px;box-shadow:0 10px 26px rgba(42,38,34,.10)}
+.print:first-child{transform:rotate(2deg)} .print:last-child{transform:rotate(-2.4deg) translateY(14px)}
+.print img{display:block;width:100%;height:auto;filter:grayscale(1) sepia(.18) contrast(1.05) brightness(1.02);mix-blend-mode:multiply}
+.print .cap{text-align:left;margin-top:8px}
+.print .soon{aspect-ratio:1/1.33;display:flex;align-items:center;justify-content:center;background:rgba(42,38,34,.04);font-family:var(--ft);font-style:italic;font-size:22px;color:var(--ink3)}
+
+/* say hi + a wild meadow to end on */
+.room.hi{grid-template-columns:1fr;text-align:center;justify-items:center;min-height:auto;padding:23vh 8vw 4vh}
+.room.hi h2{margin-bottom:12px;line-height:1.02}
+/* Chrome on iPhone turns the email into its own black-underlined link; keep only the honey line */
+a[x-apple-data-detectors]{color:inherit!important;text-decoration:none!important;font:inherit!important}
+.mail{font-family:var(--fd);font-weight:var(--dw);font-size:calc(clamp(30px,3.6vw,58px) * var(--dk));user-select:all;-webkit-user-select:all;text-decoration:underline;text-decoration-color:var(--honey);text-decoration-thickness:2px;text-underline-offset:.16em}
+#foot{position:relative;height:52vh;min-height:340px;overflow:hidden}
+#foot canvas{position:absolute;left:0;bottom:0;width:100%;height:100%;display:block}
+#footf{z-index:3}
+#fdog{opacity:0;position:absolute;left:0;top:0;z-index:2;pointer-events:none;will-change:transform}
+#fdog img{display:block;width:100%}
+#fbee{opacity:0;position:absolute;left:0;top:0;z-index:4;width:30px;pointer-events:none;will-change:transform}
+#fbee img{width:100%;display:block}
+#creditsPanel{position:fixed;left:44px;bottom:104px;transform:translate(0,6px);z-index:80;width:min(560px,86vw);padding:16px 20px;border-radius:18px;background:var(--paper);box-shadow:0 12px 30px rgba(42,38,34,.12);font:400 12px/1.65 var(--fu);color:var(--ink2);text-align:left;opacity:0;pointer-events:none;transition:opacity .35s,transform .35s}
+#creditsPanel.open{opacity:1;pointer-events:auto;transform:translate(0,0)}
+#sound{position:fixed;right:44px;bottom:calc(44px + env(safe-area-inset-bottom,0px));z-index:72;height:48px;gap:9px;padding:0 18px 0 15px;font-size:13px;background:var(--ink);color:var(--paper);box-shadow:0 8px 22px rgba(42,38,34,.22)}
+@media (hover:hover){ #sound:hover{background:#000} }
+#sound[aria-pressed="true"]{background:var(--pill-bg);color:var(--ink);box-shadow:0 6px 18px rgba(42,38,34,.07)}
+#sound[aria-pressed="true"]:hover{background:rgba(243,234,218,.98);color:#000}
+#sound svg{width:18px;height:18px}
+#sound .w1,#sound .w2{opacity:0;transition:opacity .3s}
+#sound[aria-pressed="true"] .w1,#sound[aria-pressed="true"] .w2{opacity:1}
+#sound[aria-pressed="true"] .x{opacity:0}
+#sound.nudge{animation:nudgepill 1.6s cubic-bezier(.2,.7,.2,1) 2}
+@keyframes nudgepill{0%,100%{box-shadow:0 6px 18px rgba(42,38,34,.07)}50%{box-shadow:0 0 0 6px rgba(222,164,46,.35),0 6px 18px rgba(42,38,34,.07)}}
+.creditbtn{position:fixed;left:44px;bottom:calc(44px + env(safe-area-inset-bottom,0px));z-index:72;opacity:0;pointer-events:none;transition:opacity .4s;height:48px;border:0;background:var(--pill-bg);border-radius:999px;font:500 11px/1 var(--fu);letter-spacing:.16em;text-transform:uppercase;color:var(--ink2);cursor:pointer;padding:10px 14px;box-shadow:0 6px 18px rgba(42,38,34,.07)}
+.creditbtn:hover{color:var(--ink)}
+
+body.still *{transition:none!important;animation:none!important}
+@media (pointer:coarse){ .smoke-hint{display:none} }
+@media (prefers-reduced-motion:reduce){ .hint b,.swarmart img{animation:none} .inkin{-webkit-mask-image:none;mask-image:none} .splash{opacity:var(--o,.55);transform:none} .soft,.evpop{opacity:1} }
+@media (max-width:760px){
+  /* one column everywhere, words first, no screen-tall sections */
+  /* each picture sits close to its own words; the same open space closes every section */
+  .room,.room.swarm,.room.events,.room.about{grid-template-columns:1fr;min-height:0;padding:40px 24px 104px;gap:8px}
+  .room.honey{padding-top:8px}   /* Honey arrives a little sooner after the meadow */
+  .room.flip > .art,.room.flip > .bigart{order:1}
+  .room.hi{padding:90px 24px 0}   /* room above Contact, so the About drawing is out of view at the bottom */
+  #foot{height:52vh;min-height:340px}   /* a taller footer meadow keeps the About drawing out of view at the bottom */
+  .events .art{width:84%;margin-top:-40px}
+  .jarwrap{margin:-92px auto -60px}
+  .swarmart{margin:44px auto -70px}
+  .about .art{margin-top:40px;margin-left:0;width:100%;justify-self:center}
+  .print .cap{text-wrap:balance}
+  h2{font-size:calc(clamp(34px,10vw,48px) * var(--dk))}
+  h2 span,h2 em{white-space:normal!important}
+  p{font-size:18px}
+  .cap,.print .cap{font-size:15px;color:var(--ink2)}
+  .ask .note{font-size:12px;letter-spacing:.14em}
+  #honey .ask .note{margin-bottom:10px}
+  #honey .splash{display:none}
+  /* the nav: solid enough to read over anything, comfortable to tap, low on the screen */
+  #tabs{left:50%;right:auto;transform:translateX(-50%);bottom:12px;padding:5px;gap:2px;justify-content:center;max-width:calc(100% - 20px);
+    background:rgba(243,234,218,.96);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+  #tabs a{padding:0 12px;font-size:14px;height:38px}
+  .crios #tabs{bottom:26px}   /* Chrome on iPhone: a touch higher */
+  body::after{content:'';position:fixed;left:0;right:0;bottom:0;height:86px;z-index:71;pointer-events:none;background:linear-gradient(rgba(243,234,218,0),var(--paper) 72%)}
+  /* sound: a quiet round icon in the top corner */
+  #sound,#sound[aria-pressed="true"]{right:14px;top:14px;bottom:auto;width:44px;height:44px;padding:0;gap:0;justify-content:center;font-size:0;background:var(--pill-bg);color:var(--ink);box-shadow:0 4px 14px rgba(42,38,34,.07)}
+  /* the meadow fills the tall screen: bigger name, centred hint under it */
+  #name{top:26svh}
+  #name h1{font-size:calc(15vw * var(--dk))}
+  #name p{font-size:12px;letter-spacing:.16em;line-height:1.7}
+  #name .dot{display:none} #name .sf{display:block}
+  .hint{right:auto;left:50%;top:calc(26svh + 15vw + 92px);bottom:auto;transform:translateX(-50%);white-space:nowrap;font-size:10.5px;letter-spacing:.12em;color:var(--ink3)}
+  .hint b{display:none}
+  .phrase{font-size:22px}
+  /* contact + footer */
+  .mail{font-size:clamp(22px,7.2vw,30px);word-break:normal;overflow-wrap:anywhere}
+  .creditbtn{left:14px;top:14px;bottom:auto;height:44px;font-size:10px;padding:0 14px}
+  #creditsPanel{left:14px;right:14px;top:66px;bottom:auto;width:auto}
+  /* the two prints side by side */
+  .prints{gap:16px;flex-wrap:nowrap}
+  .print{width:calc(50% - 8px);padding:8px 8px 26px}
+  .print .soon{font-size:18px}
+}
+</style>
+<script>
+if(/CriOS/.test(navigator.userAgent)) document.documentElement.classList.add('crios');
+/* always open at the very beginning: no restored scroll (also inside the share page's frame), until the visitor moves */
+(()=>{ if('scrollRestoration' in history) history.scrollRestoration='manual';
+  let moved=false; ['wheel','touchstart','keydown','pointerdown'].forEach(e=>addEventListener(e,()=>moved=true,{once:true,passive:true}));
+  const top=()=>{ if(moved) return; scrollTo(0,0); try{ document.documentElement.scrollIntoView({block:'start'}); }catch(e){} };
+  top(); addEventListener('DOMContentLoaded',top); addEventListener('load',()=>{ top(); setTimeout(top,150); setTimeout(top,600); }); addEventListener('pageshow',top);
+})();
+</script>
+</head>
+<body>
+
+<div id="cursor"><div class="c"><img src="images/bee.webp" alt=""></div></div>
+<div id="smoker"><div class="c"><div class="turn"><img src="images/smoker.webp" alt=""></div></div></div>
+<canvas id="fx" aria-hidden="true"></canvas>
+
+
+<button class="btn" id="sound" aria-pressed="false" aria-label="Sound"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 7.5h3l4-3.5v12l-4-3.5H3z" fill="currentColor"/><path class="w1" d="M13 7.2a4 4 0 0 1 0 5.6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path class="w2" d="M15.4 5a7.2 7.2 0 0 1 0 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path class="x" d="M13.2 7.6l4.4 4.8M17.6 7.6l-4.4 4.8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Sound</button>
+
+<nav id="tabs" aria-label="Sections"><div id="tabbee"><img src="images/bee.webp" alt=""></div></nav>
+
+<section id="meadow" aria-label="Dan D's Bees, an ink meadow">
+  <div class="stage" id="stage">
+    <canvas id="ink"></canvas>
+    <canvas id="mfx" aria-hidden="true"></canvas>
+    <div id="name"><h1>Dan D's Bees</h1><p>Raw wildflower honey<span class="dot"> · </span><span class="sf">San&nbsp;Francisco</span></p></div>
+    <div id="phrases"></div>
+    <div id="hound"><img src="images/dog-walking.webp" alt="A shaggy hound trotting through the meadow"></div>
+    <canvas id="inkf"></canvas>
+    <div id="mbee"><img src="images/bee.webp" alt=""></div>
+    <div class="hint" id="hint">Scroll to walk the meadow <b></b></div>
+  </div>
+</section>
+
+<main id="rooms">
+  <section class="room honey" id="honey">
+    <img class="splash" src="images/ink-splash-3.webp" alt="" style="left:62vw;top:20vh;width:7.8vw;--o:.18;--r:-4deg">
+    <img class="splash" src="images/ink-splash-2.webp" alt="" style="left:-3vw;bottom:5vh;width:11.5vw;--o:.22;--r:14deg">
+    <div style="position:relative;z-index:1">
+      <h2><span style="white-space:nowrap">Raw <em class="honey-em">wildflower</em></span><br>honey.</h2>
+      <p>{{ site.data.content.honey.intro | escape }}</p>
+      <div class="ask"><span class="cta">{{ site.data.content.honey.order | escape }}</span><span class="note">{{ site.data.content.honey.pickup | escape }}</span><button class="addr swap" type="button" data-copy="{{ site.data.content.email | escape }}" aria-label="Copy email address {{ site.data.content.email | escape }}"><span class="cp"><span class="a">{{ site.data.content.email | escape }}</span><span class="b">Copy email</span></span></button></div>
+    </div>
+    <div class="art jarwrap" id="jarwrap">
+      <img class="inkin" id="jar" src="images/honey-jar.webp" alt="A jar of raw wildflower honey, painted in ink with a golden wash">
+      <div class="jarlabel" id="jarlabel"><img src="images/dog-and-hive-label.webp" alt=""><b>Dan D's Bees</b><i>Raw wildflower honey</i><u><em>From an SF home kitchen</em>{{ site.data.content.email | escape }}</u></div>
+    </div>
+  </section>
+
+  <section class="room swarm flip" id="swarms">
+    <div class="art swarmart"><img class="inkin" id="swarmimg" src="images/swarm.webp" alt="A swarm of honeybees hanging from a branch, in ink"></div>
+    <div style="position:relative;z-index:1">
+      <h2><span style="white-space:nowrap">Found a swarm?</span><br><em style="white-space:nowrap">Call Dan.</em></h2>
+      <p>{{ site.data.content.swarms.paragraph | escape }}</p>
+      <p class="quiet">{{ site.data.content.swarms.removal | escape }}</p>
+      <div class="smoke-hint">Hold near the swarm to smoke.</div>
+    </div>
+  </section>
+
+  <section class="room events" id="events">
+    <div style="position:relative;z-index:1">
+      <h2><span style="white-space:nowrap">Events for kids</span><br><em style="white-space:nowrap">&amp; grown&#8209;ups.</em></h2>
+      <p>{{ site.data.content.events.visits | escape }}</p>
+      <p style="text-wrap:balance">{{ site.data.content.events.classes | escape }}</p>
+      <div class="ask"><span class="cta">{{ site.data.content.events.ask | escape }}</span><button class="addr swap" type="button" data-copy="{{ site.data.content.email | escape }}" aria-label="Copy email address {{ site.data.content.email | escape }}"><span class="cp"><span class="a">{{ site.data.content.email | escape }}</span><span class="b">Copy email</span></span></button></div>
+    </div>
+    <div class="art" id="evart">
+      <img class="inkin" id="evhive" src="images/hive.webp" alt="A white wooden hive among wild grasses, in ink, its bees coming and going">
+      <img class="evpop" src="images/poppy.webp" alt="" style="left:-8%;bottom:7%;width:23%;transform:scaleX(-1);z-index:3">
+      <img class="evpop" src="images/poppy.webp" alt="" style="right:-10%;bottom:11%;width:26%">
+      <img class="evpop" src="images/poppy.webp" alt="" style="left:40%;bottom:-6%;width:16%;z-index:2">
+    </div>
+  </section>
+
+  <section class="room about flip" id="about">
+    <div class="art"><img class="inkin" src="images/dog-and-hive.webp" alt="Dan's hound sitting beside a hive in a wildflower meadow, looking up at a honeybee, in ink"></div>
+    <div style="position:relative;z-index:1">
+      <h2><span style="white-space:nowrap">It started with</span><br><em style="white-space:nowrap">a swarm in&nbsp;2006.</em></h2>
+      <p>{{ site.data.content.about.story | escape }}</p>
+      <div class="prints">
+        <figure class="print"><img src="images/dan-opening-a-hive.jpg" alt="Dan showing a hive at an event"><figcaption class="cap">{{ site.data.content.about.photo_1 | escape }}</figcaption></figure>
+        <figure class="print"><img src="images/dan-and-his-dogs.jpg" alt="Dan on a hillside trail with his four dogs"><figcaption class="cap">{{ site.data.content.about.photo_2 | escape }}</figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="room hi" id="hi">
+    <div style="position:relative">
+      <div class="eyebrow">Contact</div>
+      <h2>Honey, swarms <em>&amp;&nbsp;events.</em></h2>
+      <div class="mail">{{ site.data.content.email | escape }}</div>
+      <div><button class="addr big" type="button" data-copy="{{ site.data.content.email | escape }}"><span class="cp">Copy email</span></button></div>
+    </div>
+  </section>
+  <footer id="foot" aria-label="A wild meadow">
+    <canvas id="footb"></canvas>
+    <div id="fdog"><img src="images/dog-walking.webp" alt=""></div>
+    <canvas id="footf"></canvas>
+    <div id="fbee"><img src="images/bee.webp" alt=""></div>
+    <button class="creditbtn" id="credits" aria-expanded="false" aria-controls="creditsPanel">Credits</button>
+    <div id="creditsPanel" role="region" aria-label="Credits">Sounds: honeybee swarm by <a href="https://commons.wikimedia.org/wiki/File:263673_ylearkisto_mehilainen-tarhamehilainen-parvi-bees-honeybees-a-swarm-of-bees-buzzing-among-the-flowers-apis-mellifera.wav">YleArkisto</a>, Finland, 1975 (CC BY 3.0) · honeybee buzz, <a href="https://commons.wikimedia.org/wiki/File:BioAcoustica_898_4_Apis_mellifera_(Honey_Bee)_78.flac">Natural History Museum, London, via BioAcoustica</a> (CC BY 3.0)</div>
+  </footer>
+</main>
+
+<script>
+(()=>{
+const Q=new URLSearchParams(location.search);
+// every visit starts at the very beginning of the meadow
+if('scrollRestoration' in history) history.scrollRestoration='manual';
+scrollTo(0,0);
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const fine=matchMedia('(pointer:fine)').matches;
+const previewX=Q.has('x')?Math.max(0,Math.min(1,parseFloat(Q.get('x'))||0)):null;
+const previewS=Q.get('s'), previewSmoke=Q.has('smoke');
+if(previewX!=null||previewS) document.body.classList.add('still');
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)), smooth=t=>t*t*(3-2*t), lerp=(a,b,k)=>a+(b-a)*k;
+let seed=7; const rnd=()=>((seed=(seed*16807)%2147483647)/2147483647);
+const A='images/';
+const store={get:k=>{try{return localStorage.getItem(k);}catch(e){return null;}},set:(k,v)=>{try{localStorage.setItem(k,v);}catch(e){}}};
+
+
+
+/* credits */
+const credBtn=document.getElementById('credits'), credPanel=document.getElementById('creditsPanel');
+document.addEventListener('click',e=>{ if(credPanel.classList.contains('open')&&!credPanel.contains(e.target)&&!credBtn.contains(e.target)){ credPanel.classList.remove('open'); credBtn.setAttribute('aria-expanded',false); credBtn.setAttribute('aria-pressed',false); } });
+credBtn.addEventListener('click',()=>{ const o=!credPanel.classList.contains('open'); credPanel.classList.toggle('open',o); credBtn.setAttribute('aria-expanded',o); credBtn.setAttribute('aria-pressed',o); });
+
+/* copy the address: the link still opens mail, this is for people without a mail app set up */
+document.querySelectorAll('.addr').forEach(b=>b.addEventListener('click',async()=>{ const cp=b.querySelector('.cp'), was=cp.textContent;
+  try{ await navigator.clipboard.writeText(b.dataset.copy); }catch(e){ const t=document.createElement('textarea'); t.value=b.dataset.copy; document.body.appendChild(t); t.select(); try{document.execCommand('copy');}catch(_){} t.remove(); }
+  const tgt=b.classList.contains('swap')?b.querySelector('.b'):cp; if(!tgt.dataset.label) tgt.dataset.label=tgt.textContent; const prev=tgt.dataset.label;
+  b.classList.add('ok'); tgt.textContent='Copied'; clearTimeout(b._t); b._t=setTimeout(()=>{ b.classList.remove('ok'); tgt.textContent=prev; b.blur(); },1600); }));
+
+/* ---------------- sound ---------------- */
+let ac=null,master=null,soundOn=false,buzzBufs=[],humBuf=null,hum=null;
+const soundBtn=document.getElementById('sound');
+async function loadBuf(u){const r=await fetch(u);return ac.decodeAudioData(await r.arrayBuffer());}
+async function initAudio(){
+  ac=new (window.AudioContext||window.webkitAudioContext)(); master=ac.createGain(); master.gain.value=.8; master.connect(ac.destination);
+  try{ buzzBufs=await Promise.all([1,2,3,4,5,6].map(i=>loadBuf(`sounds/buzz-${i}.mp3`))); humBuf=await loadBuf('sounds/hive-hum.mp3'); }catch(e){}
+  if(humBuf){ const s=ac.createBufferSource(); s.buffer=humBuf; s.loop=true; const lp=ac.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=800; const g=ac.createGain(); g.gain.value=0; s.connect(lp); lp.connect(g); g.connect(master); s.start(); hum={lp,g}; }
+}
+/* iPhones mute web audio when the ring switch is on silent. Pressing Sound is a clear choice to hear it, so treat the page
+   like a music player: newer iOS has a setting for that; older iOS gets there by playing a tiny silent clip. */
+let silentClip=null;
+function playThroughSilentSwitch(){
+  try{ if(navigator.audioSession) navigator.audioSession.type='playback'; }catch(e){}
+  if(silentClip){ silentClip.play().catch(()=>{}); return; }
+  const sr=8000,n=800,b=new ArrayBuffer(44+n*2),v=new DataView(b),w=(o,t)=>{for(let i=0;i<t.length;i++)v.setUint8(o+i,t.charCodeAt(i));};
+  w(0,'RIFF');v.setUint32(4,36+n*2,true);w(8,'WAVEfmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,sr,true);v.setUint32(28,sr*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);w(36,'data');v.setUint32(40,n*2,true);
+  silentClip=new Audio(URL.createObjectURL(new Blob([b],{type:'audio/wav'}))); silentClip.loop=true; silentClip.setAttribute('playsinline','');
+  silentClip.play().catch(()=>{});
+}
+async function setSound(on){ soundOn=on; soundBtn.setAttribute('aria-pressed',soundOn);
+  if(soundOn&&!fine) playThroughSilentSwitch(); else if(silentClip) silentClip.pause();
+  if(soundOn&&!ac) await initAudio(); if(ac&&ac.state==='suspended') ac.resume(); }
+soundBtn.addEventListener('click',()=>setSound(!soundOn));
+let lastBuzz=0;
+function buzz(x,vel=1,rate=1){ if(!soundOn||!ac||!buzzBufs.length) return; const now=performance.now(); if(now-lastBuzz<90) return; lastBuzz=now;
+  const s=ac.createBufferSource(); s.buffer=buzzBufs[(Math.random()*buzzBufs.length)|0]; s.playbackRate.value=rate*(.9+Math.random()*.2);
+  const g=ac.createGain(); env(g,s,.04+.16*Math.min(1,vel)); const p=ac.createStereoPanner?ac.createStereoPanner():null;
+  if(p){p.pan.value=clamp(x/innerWidth*2-1,-1,1); s.connect(g); g.connect(p); p.connect(master);} else {s.connect(g); g.connect(master);} s.start(); }
+function env(g,s,v){ const now=ac.currentTime, dur=s.buffer.duration/s.playbackRate.value; g.gain.setValueAtTime(0,now); g.gain.linearRampToValueAtTime(v,now+.05);
+  g.gain.setTargetAtTime(0,now+Math.max(.08,dur*.45),Math.max(.04,dur*.14)); s.stop(now+dur); }
+
+/* one gentle mixer: a soft hum in the meadow, almost nothing at the honey, a little more at the swarm */
+let sndZone=0, nextAmb=0;
+function soundMix(t,ctx){
+  if(!hum||!ac) return;
+  if(!soundOn){ hum.g.gain.setTargetAtTime(0,ac.currentTime,.4); return; }
+  let target=.025, lpf=650;
+  if(ctx.meadow) target=.06;
+  if(ctx.swarm>0){ target=lerp(target,Math.min(.2,.07+ctx.agit*.11)*(1-ctx.calm*.6),ctx.swarm); lpf=lerp(lpf,520+ctx.agit*800,ctx.swarm); }
+  if(ctx.events>0) target=Math.max(target,.045*ctx.events);
+  sndZone+=(target-sndZone)*.04;
+  hum.g.gain.setTargetAtTime(sndZone,ac.currentTime,.6); hum.lp.frequency.setTargetAtTime(lpf,ac.currentTime,.6);
+  // the odd passing bee in the meadow
+}
+function ambBuzz(x){ if(!soundOn||!ac||!buzzBufs.length) return; const s=ac.createBufferSource(); s.buffer=buzzBufs[(Math.random()*buzzBufs.length)|0]; s.playbackRate.value=.92+Math.random()*.16;
+  const g=ac.createGain(); g.gain.value=.05; const p=ac.createStereoPanner?ac.createStereoPanner():null; if(p){ p.pan.value=clamp(x/innerWidth*2-1,-1,1); s.connect(g); g.connect(p); p.connect(master);} else {s.connect(g); g.connect(master);} s.start(); }
+
+/* ---------------- pointer ---------------- */
+const mouse={x:-999,y:-999,vx:0,vy:0,down:false};
+const cur=document.getElementById('cursor'), smk=document.getElementById('smoker'), smkImg=smk.querySelector('img'), smkTurn=smk.querySelector('.turn');
+if(fine&&!reduce) document.body.classList.add('beecursor');
+addEventListener('pointermove',e=>{ mouse.vx=e.clientX-mouse.x; mouse.vy=e.clientY-mouse.y; if(mouse.x<-900){mouse.vx=mouse.vy=0;} mouse.x=e.clientX; mouse.y=e.clientY;
+  cur.classList.toggle('hot',!!(e.target.closest&&e.target.closest('a,button'))); },{passive:true});
+addEventListener('pointerdown',e=>{ mouse.down=true; if(overSwarm){ e.preventDefault(); if(getSelection) getSelection().removeAllRanges(); } });
+addEventListener('mousedown',e=>{ if(overSwarm) e.preventDefault(); });
+addEventListener('selectstart',e=>{ if(overSwarm||mouse.down&&document.body.classList.contains('smoking')) e.preventDefault(); });
+addEventListener('dragstart',e=>{ if(e.target&&e.target.tagName==='IMG') e.preventDefault(); });
+const up=()=>{ mouse.down=false; }; addEventListener('pointerup',up); addEventListener('pointercancel',up); addEventListener('blur',up);
+function steer(st,vx,vy,k=.18,lim=35){ if(Math.abs(vx)>.6) st.flip=vx<0?-1:1; const sp=Math.hypot(vx,vy);
+  const want=sp>.4?clamp(Math.atan2(vy,Math.abs(vx))*180/Math.PI,-lim,lim):0; st.tilt+=(want-st.tilt)*k; }
+
+/* ---------------- the ink meadow: two WebGL layers (behind and in front of the hound) ---------------- */
+const VS=`attribute vec2 a; uniform vec4 rect; uniform vec2 res; uniform float flip,t,amp,gust,slope,x0; varying vec2 uv; varying float vy,vx;
+void main(){ uv=vec2(flip>0.?a.x:1.-a.x,a.y); float bend=(1.-a.y); bend*=bend;
+  float dx=(sin(t*1.1+rect.x*.0031)*amp+gust*amp*3.)*bend;
+  vec2 p=rect.xy+a*rect.zw+vec2(dx,0.);
+  p.y+=slope*max(0.,p.x-x0);
+  vy=p.y/res.y; vx=p.x/res.x;
+  gl_Position=vec4(p.x/res.x*2.-1.,1.-p.y/res.y*2.,0.,1.); }`;
+const FS=`precision mediump float; varying vec2 uv; varying float vy,vx; uniform sampler2D tex; uniform float rev,sd,alpha,aspect,fadeB,sink,scr;
+float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float vn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}
+float fbm(vec2 p){float s=0.,a=.5;for(int i=0;i<5;i++){s+=a*vn(p);p*=2.03;a*=.5;}return s;}
+void main(){ vec4 c=texture2D(tex,uv); if(c.a<.003) discard;
+  float n=fbm(vec2(uv.x*aspect,uv.y)*3.4+sd);
+  float b=mix(uv.x,clamp(vx,0.,1.),scr)*.62+(1.-uv.y)*.38;
+  float f=mix(n,b,.5);
+  float T=rev*1.36-.18;
+  float m=smoothstep(f-.03,f+.004,T);
+  float wet=smoothstep(0.,.05,T-f)*(1.-smoothstep(.05,.18,T-f));
+  float halo=(1.-smoothstep(0.,.045,f-T))*(1.-m)*.22;
+  float ink=1.-dot(c.rgb,vec3(.3,.59,.11))/.93;
+  vec3 col=c.rgb*(1.-wet*.32*clamp(ink*2.2,0.,1.));
+  float fb=fadeB>0.?1.-smoothstep(1.-fadeB,1.,uv.y):1.;
+  float sk=1.-sink*smoothstep(.58,.98,vy);                 /* at the end, the field dissolves into the paper */
+  gl_FragColor=vec4(col,c.a*(m+halo*clamp(ink*2.,0.,1.))*alpha*fb*sk); }`;
+const IMGS={meadow:'meadow.webp',poppy:'poppy.webp',hive:'hive.webp'}, IM={};
+function makeLayer(canvas){
+  const L={cv:canvas,gl:null,U:{},T:{}};
+  try{ L.gl=canvas.getContext('webgl',{premultipliedAlpha:false,antialias:true,alpha:true}); }catch(e){}
+  if(!L.gl){ L.c2=canvas.getContext('2d'); return L; }
+  const gl=L.gl, sh=(t,s)=>{const x=gl.createShader(t);gl.shaderSource(x,s);gl.compileShader(x);if(!gl.getShaderParameter(x,gl.COMPILE_STATUS))throw gl.getShaderInfoLog(x);return x;};
+  try{ const pr=gl.createProgram(); gl.attachShader(pr,sh(gl.VERTEX_SHADER,VS)); gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,FS)); gl.linkProgram(pr); gl.useProgram(pr); L.pr=pr; }
+  catch(e){ console.warn(e); L.gl=null; L.c2=canvas.getContext('2d'); return L; }
+  const q=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,q); gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([0,0,1,0,0,1,1,1]),gl.STATIC_DRAW);
+  const loc=gl.getAttribLocation(L.pr,'a'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+  ['rect','res','flip','t','amp','gust','slope','x0','tex','rev','sd','alpha','aspect','fadeB','sink','scr'].forEach(n=>L.U[n]=gl.getUniformLocation(L.pr,n));
+  gl.enable(gl.BLEND); gl.blendFuncSeparate(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA,gl.ONE,gl.ONE_MINUS_SRC_ALPHA);
+  gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,false);
+  return L;
+}
+function upload(L){ if(!L.gl) return; const gl=L.gl; for(const k in IM){ if(L.T[k]) continue; const t=gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D,t); gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,IM[k].im);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE); L.T[k]=t; } }
+function loadImages(cb){ let n=0,k=Object.keys(IMGS).length; for(const key in IMGS){ const im=new Image(); im.onload=()=>{ IM[key]={im,w:im.naturalWidth,h:im.naturalHeight}; if(++n===k) cb(); }; im.src=A+IMGS[key]; } }
+
+const back=makeLayer(document.getElementById('ink')), front=makeLayer(document.getElementById('inkf'));
+let U=Math.min(innerHeight,innerWidth*1.1),W=innerWidth,H=innerHeight,dpr=Math.min(1.5,devicePixelRatio||1), D=0, off=0, offV=0, lastOff=0, intro0=0;
+let piecesB=[], piecesF=[], hivePiece=null, poppyPieces=[];
+// ground is always fully inked (no gaps, no visible strip edges); only the hive and the poppies ink in as you reach them
+function buildWorld(){
+  piecesB=[]; piecesF=[]; poppyPieces=[]; hivePiece=null; seed=7; if(!IM.meadow) return;
+  const S=W<760?Math.min(H*.85,W*1.85):H;
+  const G=W<760?H-74:H;   // on a phone the ground is lifted clear of the nav   // on a phone the plants are sized to the width, so a poppy never fills the screen
+  const add=(arr,tex,x,yb,h,par,o)=>{ const T=IM[tex]; const w=h*T.w/T.h; const p=Object.assign({tex,x,yb,h,w,par,flip:1,amp:2,alpha:1,sd:rnd()*40,rev:0,ground:false},o||{}); arr.push(p); return p; };
+  let lay=0; const tile=(arr,h,yb,par,from,to,o)=>{ const w=h*IM.meadow.w/IM.meadow.h; lay++; const ph=W<760?[0,.47,.21,.73][lay%4]*w:0;
+    for(let x=from-ph,i=0;x<to;i++){ const j=W<760?((i*37+lay*11)%10)/10:0; add(arr,'meadow',x,yb+(W<760?(j-.5)*h*.06:0),h,par,Object.assign({flip:W<760?((i*7+3+lay)%5<2?-1:1):(i%2?-1:1),ground:true},o)); x+=w*(W<760?.66+j*.3:.88); } };
+  // flowers behind: raised, lighter, slower
+  tile(piecesB,S*.34,G*.89,.55,-W*.4,D*.55+W*1.6,{alpha:.32,amp:1.2,layer:0,fadeB:.7});
+  // the main meadow: raised so the hound walks in it
+  // started a little further left so the two tall dark stalks don't stand up through his back where he first appears
+  tile(piecesB,S*.48,G*1.02,1,-W*.4-S*.48*IM.meadow.w/IM.meadow.h*.3,D+W*1.6,{alpha:.96,amp:2.2,layer:1});
+  // the hive at the second beat
+  hivePiece=add(piecesB,'hive',.47*D+W*.66,G*.99,U*.72,1,{amp:.6,layer:.9});
+  { const hx=hivePiece.x, hw=hivePiece.w;   // a taller drift of flowers behind the hive, so it sits in the meadow instead of on a ledge
+    // just enough to close the gap where the field dropped away behind the hive: one soft, pale strip on its far side
+    add(piecesB,'meadow',hx+hw*.55,G*1.0,S*.54,1,{flip:-1,amp:2,layer:.85,alpha:.42}); }
+  // poppies in pairs from the same plant, set in the far back: they drift slower than the meadow and sit lower in it
+  [[.13,.58],[.36,.62],[.62,.56],[.88,.6]].forEach(([at,s0],i)=>{ const s=s0*(W<760?.78:1);   // a little smaller on phones
+    const x=at*D*.75+W*(.95+i*.05)-(i===1?W*.13:0);   // the keeper's pair steps left so the hive has room
+    poppyPieces.push(add(piecesB,'poppy',x,G*1.04,S*s,.75,{flip:i%2?-1:1,amp:5,layer:-1,alpha:.7}));
+    poppyPieces.push(add(piecesB,'poppy',x+S*s*(i===1?.44:.58),G*1.06,S*s*.74,.75,{flip:i%2?1:-1,amp:6,layer:-1,alpha:.68})); });
+  piecesB.sort((p,q)=>p.layer-q.layer);
+  // grass in front of the hound: covers his legs, so he walks through the meadow instead of carrying a patch
+  tile(piecesF,W<760?W*.46:S*.34,G*1.05,1.12,-W*.4,D*1.12+W*1.6,{alpha:.96,amp:3,layer:3});
+}
+function sizeCanvas(L){ L.cv.width=Math.round(W*dpr); L.cv.height=Math.round(H*dpr); if(L.gl) L.gl.viewport(0,0,L.cv.width,L.cv.height); }
+const world={slope:0,x0:0,sink:0};
+function slopeAt(x){ return world.slope*Math.max(0,x-world.x0); }
+function drawLayer(L,pieces,t,gust){
+  const introT=reduce||previewX!=null?99:(t-intro0)/1000;
+  const gl=L.gl;
+  if(gl){ gl.clearColor(0,0,0,0); gl.clear(gl.COLOR_BUFFER_BIT); gl.uniform2f(L.U.res,L.cv.width,L.cv.height); gl.uniform1f(L.U.t,reduce?0:t/1000); gl.uniform1f(L.U.gust,reduce?0:-gust);
+    gl.uniform1f(L.U.slope,world.slope); gl.uniform1f(L.U.x0,world.x0*dpr); gl.uniform1f(L.U.sink,world.sink); }
+  else if(L.c2){ L.c2.setTransform(1,0,0,1,0,0); L.c2.clearRect(0,0,L.cv.width,L.cv.height); }
+  for(const p of pieces){
+    const sx=p.x-off*p.par, sy=p.yb-p.h; p.sx=sx; p.sy=sy;
+    if(sx>W+40||sx+p.w<-80) continue;
+    const intro=p.ground?clamp((introT-.05)/1.3,0,1):clamp((introT-.2-Math.min(Math.max(0,sx),W)/W*.9)/1.1,0,1);
+    let r;
+    if(p.ground) r=intro;
+    else { const prox=clamp((W*1.2-sx)/(W*.5),0,1); p.rev=Math.max(p.rev,Math.min(prox,intro)); r=reduce||previewX!=null?Math.max(p.rev,prox):p.rev; }
+    if(!L.T[p.tex]&&gl) continue;
+    if(gl){ gl.bindTexture(gl.TEXTURE_2D,L.T[p.tex]); gl.uniform1i(L.U.tex,0);
+      gl.uniform4f(L.U.rect,sx*dpr,sy*dpr,p.w*dpr,p.h*dpr); gl.uniform1f(L.U.flip,p.flip); gl.uniform1f(L.U.amp,p.amp*dpr);
+      gl.uniform1f(L.U.rev,r); gl.uniform1f(L.U.sd,p.sd); gl.uniform1f(L.U.alpha,p.alpha); gl.uniform1f(L.U.aspect,p.w/p.h); gl.uniform1f(L.U.fadeB,p.fadeB||0); gl.uniform1f(L.U.scr,p.ground?1:0);
+      gl.drawArrays(gl.TRIANGLE_STRIP,0,4); }
+    else if(L.c2){ const c=L.c2; c.save(); c.globalAlpha=p.alpha*r*(1-world.sink*.8); c.translate(sx*dpr+(p.flip<0?p.w*dpr:0),(sy+slopeAt(sx+p.w/2))*dpr); c.scale(p.flip,1); c.drawImage(IM[p.tex].im,0,0,p.w*dpr,p.h*dpr); c.restore(); }
+  }
+}
+
+/* ---------------- the name, the lines, the hound and his bee ---------------- */
+const nameEl=document.getElementById('name'), phEl=document.getElementById('phrases'); let phrases=[];
+const PH=[{at:.2,y:.31,html:'<small>The honey</small>Raw wildflower honey,<br>from San Francisco hives.'},
+          {at:.47,y:.3,html:'<small>The keeper</small>Keeping bees<br>since 2006.'},
+          {at:.74,y:.32,dx:.1,html:'<small>The work</small>Swarm calls, hive removal,<br>school visits, classes &amp; events.'}];
+function placePhrases(){ phEl.innerHTML=''; phrases=PH.map(p=>{ const el=document.createElement('div'); el.className='phrase'; el.innerHTML=p.html; phEl.appendChild(el); return {el,wx:p.at*D+W*(W<760?.95:.5+(p.dx||0)),y:H*(W<760?p.y+.04:p.y)}; }); }
+const houndEl=document.getElementById('hound'), mbeeEl=document.getElementById('mbee');
+const hd={w:0,h:0,x0:0,x:0,y0:0,y:0,phase:0,flip:1,bob:0,e:0}, mb={x:0,y:0,vx:0,vy:0,st:{flip:1,tilt:0}};
+function sizeHound(){ hd.h=W<760?W*.42:U*.33; hd.w=hd.h*1595/730; houndEl.style.width=hd.w+'px'; hd.x0=W*.07; hd.y0=W<760?H-74-hd.h*.86:H-hd.h*.95; }
+function tickHound(t,d){
+  const moving=(Math.abs(offV)>.25||d>.02)&&!reduce;
+  if(Math.abs(offV)>.4) hd.flip=offV<0?-1:1;
+  hd.phase+=Math.min(.35,Math.abs(offV)*.018+(d>0&&d<1?.05:0));
+  const amt=moving?Math.min(1,Math.abs(offV)/6+d*.6):0; hd.bob+=(amt-hd.bob)*.12;
+  // at the end of the meadow the field slopes away and he trots down it
+  // his own eased walk down the slope: even on a fast scroll he trots, he never shoots off the edge
+  hd.e+=((reduce||previewX!=null?d:d)-hd.e)*(reduce||previewX!=null?1:.035);
+  hd.x=hd.x0+smooth(hd.e)*W*.24; const cx=hd.x+hd.w*.55; hd.y=hd.y0+slopeAt(cx)*.72;
+  const by=-Math.abs(Math.sin(hd.phase))*7*hd.bob, rot=Math.sin(hd.phase*2)*.9*hd.bob+smooth(hd.e)*hd.flip*Math.atan(world.slope)*57*.45;
+  const breathe=reduce?0:Math.sin(t/900)*1.2*(1-hd.bob);
+  houndEl.style.transform=`translate3d(${hd.x}px,${hd.y+by}px,0) scaleX(${hd.flip}) rotate(${rot}deg) scaleY(${1+breathe*.002})`;
+  // he arrives with the grass in front of him: faded in as the meadow inks across his far edge, so he is never seen without his legs
+  const introT=reduce||previewX!=null?99:(t-intro0)/1000, arrive=smooth(clamp((introT-.6-Math.min(W,hd.x+hd.w)/W*.3)/1.0,0,1));
+  houndEl.style.opacity=(arrive*(1-world.sink*.35)).toFixed(3);   // he leaves with the meadow, not before it
+  const nx=hd.flip>0?hd.x+hd.w*.84:hd.x+hd.w*.16, ny=hd.y+hd.h*.22+(slopeAt(nx)-slopeAt(cx))*.72, s=t/1000;
+  const lead=hd.flip*(60+Math.min(120,Math.abs(offV)*6)+d*80);
+  let tx=nx+lead+Math.sin(s*1.3)*34+Math.sin(s*3.1)*10, ty=ny-30+Math.sin(s*1.7+1)*26+Math.cos(s*4.3)*6+d*60;
+  let ax=(tx-mb.x)*.03, ay=(ty-mb.y)*.03; const dx=mb.x-mouse.x, dy=mb.y-mouse.y, dd=Math.hypot(dx,dy);
+  if(dd<130&&!reduce){ ax+=dx/dd*2.4*(1-dd/130); ay+=dy/dd*2.4*(1-dd/130); }
+  if(reduce||!mb.x){ mb.x=tx; mb.y=ty; } else { mb.vx=(mb.vx+ax)*.88; mb.vy=(mb.vy+ay)*.88; mb.x+=mb.vx; mb.y+=mb.vy; }
+  steer(mb.st,mb.vx,mb.vy,.12);
+  mbeeEl.style.transform=`translate3d(${mb.x-29}px,${mb.y-29}px,0) scaleX(${mb.st.flip}) rotate(${mb.st.tilt}deg)`;
+  mbeeEl.style.opacity=houndEl.style.opacity;
+}
+function tickType(t){
+  const introT=reduce||previewX!=null?9:(t-intro0)/1000;
+  const inA=smooth(clamp(introT/1.6,0,1)), k=smooth(clamp(off/(W*.56),0,1));
+  nameEl.style.opacity=(inA*(1-k)).toFixed(3); nameEl.style.filter=`blur(${((1-inA)*7+k*3).toFixed(2)}px)`;
+  nameEl.style.transform=`translate3d(${-off*.35}px,${k*-H*.05}px,0)`;
+  // the hint is the last beat: it arrives after the name, and leaves with it
+  { const hin=reduce?1:smooth(clamp((introT-1.9)/.9,0,1));
+    hint.style.opacity=(hin*(1-k)*.9).toFixed(3); hint.style.filter=`blur(${((1-hin)*4+k*3).toFixed(2)}px)`; hint.style.translate=`${(-off*.35).toFixed(1)}px ${(k*-H*.05).toFixed(1)}px`; }
+  for(const p of phrases){ const sx=p.wx-off; const v=smooth(clamp((W*1.02-sx)/(W*.42),0,1))*(1-smooth(clamp((-sx)/(W*.25),0,1)));
+    p.el.style.transform=`translate3d(${sx}px,${p.y}px,0)`; p.el.style.opacity=v.toFixed(3); p.el.style.filter=`blur(${((1-v)*6).toFixed(2)}px)`;
+    p.el.style.visibility=(sx>-W*.6&&sx<W+40)?'visible':'hidden'; }
+}
+
+/* ---------------- tabs ---------------- */
+const tabs=document.getElementById('tabs'), tabbee=document.getElementById('tabbee');
+const ALLSTOPS=[['meadow','Meadow'],['honey','Honey'],['swarms','Swarms'],['events','Events'],['about','About'],['hi','Contact']]; let STOPS=ALLSTOPS;
+let stopY=[], tabEls=[], tabX=[]; const tbs={x:0,flip:1,tilt:0};
+let navTapped=false;
+function buildTabs(){ tabEls.forEach(a=>a.remove()); STOPS=ALLSTOPS.filter(s=>!(innerWidth<760&&s[0]==='meadow')); tabEls=STOPS.map(([id,name],i)=>{ const a=document.createElement('a'); a.href='#'+id; a.textContent=name; a.addEventListener('click',e=>{e.preventDefault(); navTapped=true; flyTo(i);}); tabs.appendChild(a); return a; }); measureStops(); }
+function measureStops(){ stopY=STOPS.map(([id],i)=>{ if(id==='meadow') return 0; if(id==='hi') return Math.max(0,document.documentElement.scrollHeight-innerHeight); const el=document.getElementById(id);
+    if(innerWidth<760){ const h=el.querySelector('h2'); return h.getBoundingClientRect().top+scrollY-40; }   // phones: every title lands at the same height
+    return el.getBoundingClientRect().top+scrollY-Math.max(0,(innerHeight-el.offsetHeight)/2); });
+  const tr=tabs.getBoundingClientRect(); tabX=tabEls.map(a=>{ const r=a.getBoundingClientRect(); return r.left-tr.left+r.width/2; }); }
+function stopPos(y){ const n=STOPS.length-1; if(y<=stopY[0]) return 0; if(y>=stopY[n]) return n; for(let i=0;i<n;i++) if(y<=stopY[i+1]) return i+(y-stopY[i])/Math.max(1,stopY[i+1]-stopY[i]); return n; }
+let scrollAnim=null;
+['touchstart','wheel'].forEach(ev=>addEventListener(ev,()=>cancelAnimationFrame(scrollAnim),{passive:true}));   // a tap on the nav glides; a finger takes over
+function flyTo(i){ measureStops(); const y=Math.max(0,stopY[i]); if(reduce){scrollTo(0,y);return;} const y0=scrollY,dd=y-y0,dur=Math.min(2600,600+Math.abs(dd)*.18),ts=performance.now(); cancelAnimationFrame(scrollAnim);
+  const step=t=>{ const k=Math.min(1,(t-ts)/dur), e=k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2; scrollTo(0,y0+dd*e); if(k<1) scrollAnim=requestAnimationFrame(step); }; scrollAnim=requestAnimationFrame(step); }
+function tickTabs(t){ if(!tabX.length) return;
+  /* Contact is the bottom of the page, measured live: the reachable bottom moves as the browser bars hide and come back */
+  if(STOPS[STOPS.length-1][0]==='hi'){ const n=stopY.length-1; stopY[n]=Math.max(stopY[n-1]+1,document.documentElement.scrollHeight-innerHeight-24); }
+  const f=previewS?Math.max(0,STOPS.findIndex(s=>s[0]===previewS)):stopPos(scrollY+(previewX!=null?previewX*D:0));
+  const i=Math.floor(f), fr=f-i, tx=i>=tabX.length-1?tabX[tabX.length-1]:tabX[i]+(tabX[i+1]-tabX[i])*fr;
+  const vx=tx-tbs.x; tbs.x+=(reduce||previewS||previewX!=null)?vx:vx*.12; steer(tbs,vx*.12,Math.cos(t/170)*1.2,.12);
+  tabbee.style.transform=`translate3d(${tbs.x-13}px,${reduce?0:Math.sin(t/240)*3}px,0) scaleX(${tbs.flip}) rotate(${tbs.tilt}deg)`;
+  let here=Math.min(STOPS.length-1,Math.floor(f+.04)); if(STOPS[0][0]!=='meadow'&&scrollY<stopY[0]-innerHeight*.5) here=-1;
+  /* phones: the nav bee waits in the meadow until you reach Honey or tap a tab */ tabbee.style.opacity=(here<0&&!navTapped)?0:1; tabEls.forEach((a,k)=>{ a.classList.toggle('here',k===here); if(k===here) a.setAttribute('aria-current','true'); else a.removeAttribute('aria-current'); }); }
+
+/* ---------------- illustrations ink in; splashes bloom ---------------- */
+const io=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ const el=e.target; el.classList.add('in'); io.unobserve(el);
+  if(el.classList.contains('inkin')) setTimeout(()=>el.classList.add('done'),2600); } }),{threshold:0,rootMargin:'0px 0px -12% 0px'});
+document.querySelectorAll('.inkin,.splash,.soft,.evpop').forEach(el=>{ if(reduce||previewS){ el.classList.add('in','done'); } else io.observe(el); });
+
+/* ---------------- the live layer: bees and smoke over the page ---------------- */
+const fx=document.getElementById('fx'), fxc=fx.getContext('2d'), mfx=document.getElementById('mfx'), mfc=mfx.getContext('2d'); let fc=fxc;
+function sizeFx(){ fx.width=mfx.width=Math.round(W*dpr); fx.height=mfx.height=Math.round(H*dpr); }
+const beeImgs=[0,1,2,3,4,5].map(n=>{const i=new Image(); i.src=A+'bee-'+(n+1)+'.webp'; return i;});
+const mainBee=new Image(); mainBee.src=A+'bee.webp';
+const smokeImgs=['smoke-1','smoke-2','smoke-3','smoke-4'].map(n=>{const i=new Image(); i.src=A+n+'.webp'; return i;});
+let meadowFade=1;
+function drawBee(img,x,y,s,st,a,t,flying){ if(!img.complete||!img.naturalWidth) return; const w=s, h=s*img.naturalHeight/img.naturalWidth;
+  const fl=flying?1-.06*Math.abs(Math.sin(t/16+x)):1;
+  fc.save(); fc.globalAlpha=a; fc.translate(x,y); fc.scale(st.flip,1); fc.rotate(st.tilt*Math.PI/180); fc.scale(1,fl); fc.drawImage(img,-w/2,-h/2,w,h); fc.restore(); }
+
+// a busy hive: bees leave the entrance, visit flowers, come home (near real speed, slowed a touch)
+function makeHive(N,sizes,getE,getTargets,page){
+  seed=11+N; const bees=[];
+  for(let i=0;i<N;i++) bees.push({x:0,y:0,vx:0,vy:0,state:i<(N>40&&N<44?10:5)?'guard':'home',timer:rnd()*3,tx:0,ty:0,ox:(rnd()-.5)*2,oy:(rnd()-.5)*2,s:sizes[0]+rnd()*(sizes[1]-sizes[0]),img:beeImgs[(rnd()*6)|0],ph:rnd()*9,st:{flip:1,tilt:0},vmax:2.6+rnd()*1.6});
+  let primed=false;
+  return {bees,tick(t,dt){
+    let E=getE(); if(!E) return false;
+    if(E.homebody&&this.lastE){ const mx=E.x-this.lastE.x, my=E.y-this.lastE.y; for(const b of bees){ b.x+=mx; b.y+=my; if(b.free){ b.free.x+=mx; b.free.y+=my; } } }
+    if(E.homebody) this.lastE={x:E.x,y:E.y};
+    let T=getTargets();
+    const sy=page?scrollY:0;
+    if(page){ E={x:E.x,y:E.y+sy,w:E.w}; T=T.map(q=>({id:q.id,x:q.x,y:q.y+sy})); }
+    if(!primed){ primed=true;
+      // the hive is already busy when you arrive: half the bees are out on flowers or in the air
+      bees.forEach((b,i)=>{ b.x=E.x; b.y=E.y; b.init=1;
+        if(b.state==='home'&&i%2===0){ const tg=T.length?T[i%T.length]:null; b.target=tg; b.free={x:E.x+(rnd()-.4)*E.w*1.4,y:E.y-E.w*(.15+rnd()*.7)};
+          const at=tg||b.free; b.x=at.x+(rnd()-.5)*40; b.y=at.y+(rnd()-.5)*30; b.state=tg?'visit':'out'; b.timer=rnd()*2.5; } }); }
+    for(const b of bees){
+      if(!b.init){ b.x=E.x; b.y=E.y; b.init=1; }
+      if(E.recall&&(b.state==='out'||b.state==='visit'||b.state==='guard')) b.state='back';
+      if(b.state==='home'&&E.recall){ b.x=E.x; b.y=E.y; continue; }
+      if(b.state==='home'){ b.timer-=dt; b.x=E.x; b.y=E.y; if(b.timer<=0){ b.state='out'; const tg=T.length&&rnd()<(E.homebody?.15:.5)?T[(rnd()*T.length)|0]:null;
+          b.target=tg; const far=rnd()<(E.homebody?.12:.35); b.free={x:E.x+(rnd()-.4)*E.w*(far?1.9:.9),y:E.y-E.w*(far?(.3+rnd()*1.1):(.08+rnd()*.5))}; b.vx=(rnd()-.5)*2; b.vy=-1.5-rnd(); }
+        continue; }
+      let tx,ty,arrive=14;
+      if(b.state==='guard'){ tx=E.x+Math.cos(t/700+b.ph)*E.w*.22; ty=E.y-E.w*.08+Math.sin(t/520+b.ph)*E.w*.08; arrive=0; }
+      else if(b.state==='out'){ const p=b.target?T.find(q=>q.id===b.target.id)||null:null; if(b.target&&!p){ b.target=null; }
+        tx=p?p.x:b.free.x; ty=p?p.y:b.free.y; }
+      else if(b.state==='visit'){ const p=b.target?T.find(q=>q.id===b.target.id):null; tx=(p?p.x:b.free.x)+b.ox*26+Math.cos(t/260+b.ph)*12; ty=(p?p.y:b.free.y)+b.oy*16+Math.sin(t/330+b.ph)*8; arrive=0;
+        b.timer-=dt; if(b.timer<=0){ b.state='back'; } }
+      else { tx=E.x; ty=E.y; }
+      const dx=tx-b.x, dy=ty-b.y, d=Math.hypot(dx,dy)||1;
+      const want=b.state==='visit'||b.state==='guard'?Math.min(1.2,d*.08):Math.min(b.vmax,d*.06+.6);
+      b.vx+=(dx/d*want-b.vx)*.09+Math.sin(t/180+b.ph)*.06; b.vy+=(dy/d*want-b.vy)*.09+Math.cos(t/210+b.ph)*.06;
+      // keep flying bees apart so they never travel as one blob
+      for(const o of bees){ if(o===b||o.state==='home') continue; const sx=b.x-o.x, sy2=b.y-o.y, sd=sx*sx+sy2*sy2; if(sd<900&&sd>.01){ const k=(1-Math.sqrt(sd)/30)*.35; b.vx+=sx/Math.sqrt(sd)*k; b.vy+=sy2/Math.sqrt(sd)*k; } }
+      b.x+=b.vx*dt*60; b.y+=b.vy*dt*60;
+      if(arrive&&d<arrive){ if(b.state==='out'){ b.state='visit'; b.timer=.8+rnd()*2.2; } else if(b.state==='back'){ b.state='home'; b.timer=.3+rnd()*2; } }
+      steer(b.st,b.vx,b.vy,.15);
+      const near=b.state==='back'?clamp(d/40,.35,1):1;
+      drawBee(b.img,b.x,b.y-sy,b.s*near,b.st,.96*(E.fade==null?1:E.fade),t,true);
+    }
+    return true; }};
+}
+// the meadow hive
+// when the hive leaves the screen the bees don't vanish: they finish their trip and fly home to it
+let meadowSeen=false;
+const meadowHive=makeHive(42,[17,23],()=>{ if(!hivePiece||hivePiece.sx==null) return null; if(hivePiece.rev<.6&&!meadowSeen) return null; meadowSeen=true;
+  const p=hivePiece; const lift=Math.max(0,scrollY-D); const x=p.sx+p.w*.564, y=p.sy+p.h*.689+slopeAt(x)-lift;
+  if(meadowFade<=.01) return null; return {x,y,w:p.w*.4,fade:meadowFade,homebody:1,recall:x<-60||x>W+60||scrollY>D+H*.1}; },
+  ()=>[].concat(poppyPieces.filter(()=>false)).map((p,i)=>{ const hx=p.sx+(p.flip>0?.68:.32)*p.w; return {id:poppyPieces.indexOf(p),x:hx,y:p.sy+p.h*.27+slopeAt(hx)-Math.max(0,scrollY-D)}; }));
+// the events hive
+const evHive=document.getElementById('evhive'), evPops=[...document.querySelectorAll('.evpop')];
+const eventsHive=makeHive(innerWidth<760?18:44,[16,23],()=>{ if(!evHive.classList.contains('in')) return null; const r=evHive.getBoundingClientRect(); if(r.bottom<-100||r.top>H+100) return null; return {x:r.left+r.width*.564,y:r.top+r.height*.689,w:r.width*.4}; },
+  ()=>evPops.map((el,i)=>{ const r=el.getBoundingClientRect(); const fl=getComputedStyle(el).transform!=='none'; return {id:i,x:r.left+r.width*(fl?.32:.68),y:r.top+r.height*.27}; }),true);
+
+// two bees keep the honey company
+const jarEl=document.getElementById('jar'); const jarBees=[{a:0,st:{flip:1,tilt:0},x:0,y:0,img:beeImgs[1],s:30},{a:2.2,st:{flip:1,tilt:0},x:0,y:0,img:beeImgs[4],s:24}];
+function tickJar(t){ if(!jarEl.classList.contains('in')) return; const r=jarEl.getBoundingClientRect(); if(r.bottom<0||r.top>H) return;
+  for(const b of jarBees){ b.a+=.012; const tx=r.left+r.width*(.55+Math.cos(b.a)*.32), ty=r.top+r.height*(.14+Math.sin(b.a*1.3)*.07);
+    const vx=tx-b.x, vy=ty-b.y; if(!b.x){b.x=tx;b.y=ty;} b.x+=vx*.08; b.y+=vy*.08; steer(b.st,vx,vy,.12); drawBee(b.img,b.x,b.y,b.s,b.st,.97,t,true); } }
+
+/* bees roam the whole page below the meadow: coming and going, never in a clump */
+const roam=[]; { seed=21; const edge=()=>(rnd()<.5?rnd()*.08:.92+rnd()*.08)*innerWidth; for(let i=0;i<(reduce?0:innerWidth<760?2:4);i++) roam.push({x:edge(),y:rnd()*innerHeight,vx:0,vy:0,tx:0,ty:0,next:0,s:15+rnd()*6,img:beeImgs[(rnd()*6)|0],ph:rnd()*9,st:{flip:1,tilt:0},sp:1.4+rnd()*1.2}); }
+function tickRoam(t,dt){ if(!roam.length) return; const a=clamp((scrollY-D)/(H*.6),0,1); if(a<=0) return;
+  for(const b of roam){
+    if(t>b.next||Math.hypot(b.tx-b.x,b.ty-b.y)<30){ b.next=t+2500+Math.random()*5000;
+      // pick a new spot: mostly the sides and open paper, so they cross the page instead of hovering on text
+      b.tx=(W<760?(Math.random()<.5?Math.random()*.03:.97+Math.random()*.03):(Math.random()<.5?.01+Math.random()*.07:.92+Math.random()*.07))*W; b.ty=(.1+Math.random()*.75)*H; }
+    const dx=b.tx-b.x, dy=b.ty-b.y, d=Math.hypot(dx,dy)||1;
+    b.vx+=(dx/d*b.sp-b.vx)*.04+Math.sin(t/230+b.ph)*.08; b.vy+=(dy/d*b.sp-b.vy)*.04+Math.cos(t/270+b.ph)*.08;
+    for(const o of roam){ if(o===b) continue; const sx=b.x-o.x, sy=b.y-o.y, sd=sx*sx+sy*sy; if(sd<3600&&sd>.01){ const q=Math.sqrt(sd), k=(1-q/60)*.25; b.vx+=sx/q*k; b.vy+=sy/q*k; } }
+    const md=Math.hypot(b.x-mouse.x,b.y-mouse.y); if(md<90){ b.vx+=(b.x-mouse.x)/md*.6; b.vy+=(b.y-mouse.y)/md*.6; }
+    b.x+=b.vx*dt*60; b.y+=b.vy*dt*60; steer(b.st,b.vx,b.vy,.12);
+    drawBee(b.img,b.x,b.y,b.s,b.st,.92*a,t,true); } }
+
+/* honey label: a fixed card mapped onto the jar's front face with a projective transform */
+const jarLabel=document.getElementById('jarlabel'), jarWrap=document.getElementById('jarwrap');
+// front face corners on honey-jar.webp (870x1100), and the label's place inside that face
+const FACE=[[360,582],[650,546],[644,846],[364,884]], LU=[.1,.9], LV=[.1,.9];
+function homography(src,dst){ const A=[],b=[]; for(let i=0;i<4;i++){ const [x,y]=src[i],[u,v]=dst[i]; A.push([x,y,1,0,0,0,-u*x,-u*y]); b.push(u); A.push([0,0,0,x,y,1,-v*x,-v*y]); b.push(v); }
+  for(let i=0;i<8;i++){ let m=i; for(let r=i+1;r<8;r++) if(Math.abs(A[r][i])>Math.abs(A[m][i])) m=r; [A[i],A[m]]=[A[m],A[i]]; [b[i],b[m]]=[b[m],b[i]];
+    for(let r=0;r<8;r++){ if(r===i) continue; const f=A[r][i]/A[i][i]; for(let c=i;c<8;c++) A[r][c]-=f*A[i][c]; b[r]-=f*b[i]; } }
+  const h=b.map((v,i)=>v/A[i][i]); return [h[0],h[3],0,h[6], h[1],h[4],0,h[7], 0,0,1,0, h[2],h[5],0,1]; }
+function placeLabel(){ const img=document.getElementById('jar'); const w=img.clientWidth; if(!w) return; const k=w/870;
+  const pt=(u,v)=>{ const top=[lerp(FACE[0][0],FACE[1][0],u),lerp(FACE[0][1],FACE[1][1],u)], bot=[lerp(FACE[3][0],FACE[2][0],u),lerp(FACE[3][1],FACE[2][1],u)]; return [lerp(top[0],bot[0],v)*k,lerp(top[1],bot[1],v)*k]; };
+  const dst=[pt(LU[0],LV[0]),pt(LU[1],LV[0]),pt(LU[1],LV[1]),pt(LU[0],LV[1])], lw=300, lh=330;
+  jarLabel.style.transform='matrix3d('+homography([[0,0],[lw,0],[lw,lh],[0,lh]],dst).map(v=>+v.toFixed(8)).join(',')+')'; }
+
+/* the swarm, calmed by ink smoke from a smoker that turns to face it */
+const swarmArt=document.querySelector('.swarmart'), swarmImg=document.getElementById('swarmimg');
+let swc=null, swg=null; if(!fine){ swc=document.createElement('canvas'); swc.setAttribute('aria-hidden','true'); swc.style.cssText='position:absolute;left:-15%;top:-15%;width:130%;height:130%;pointer-events:none;z-index:2'; swarmArt.style.position='relative'; swarmArt.appendChild(swc); swg=swc.getContext('2d'); }
+let fly=[], smoke=[], agit=0, overSwarm=false, swAnchor=null; const swarmMix={vis:0,calm:0,agit:0}; const smS={rot:0,flip:1,side:1,turn:0,squeeze:0,lastPuff:0};
+// a real swarm is packed: most bees sit tight in the middle and move as one body, a few circle loose
+function seedSwarm(){ seed=5; fly=[]; const N=reduce?24:320;
+  for(let i=0;i<N;i++){ const loose=i<12; const mid=(rnd()+rnd()+rnd())/3; const core=!loose&&rnd()<.25; fly.push({a:rnd()*6.283,rad:loose?(.7+rnd()*.35):core?(.05+rnd()*.25):(.06+mid*.52),sp:(loose?(.007+rnd()*.013):(.003+rnd()*.006))*(rnd()<.5?-1:1),x:0,y:0,vx:0,vy:0,
+    s:loose?(15+rnd()*6):(24+rnd()*14),img:rnd()<.85?beeImgs[(rnd()*6)|0]:mainBee,ph:rnd()*9,calm:0,st:{flip:1,tilt:0}}); } }
+function puff(x,y,dir,big){ const img=smokeImgs[big?3:(Math.random()*3)|0];
+  smoke.push({img,x,y:y+scrollY,vx:dir.x*1.5+(Math.random()-.5)*.5+mouse.vx*.03,vy:dir.y*1.5-.45-Math.random()*.55,rot:(Math.random()-.5)*.6,vr:(Math.random()-.5)*.004,
+    s:(big?.16:.12)+Math.random()*.06,gs:big?.0014:.0019,a:big?.42:.5,life:1}); }
+function tickSwarm(t){
+  const r=swarmArt.getBoundingClientRect(); const vis=r.bottom>-H*.4&&r.top<H*1.4;
+  const sw=reduce?0:t/1000; const cx=r.left+r.width*(.575+Math.sin(sw*.45)*.035), cy=r.top+r.height*(.58+Math.sin(sw*.31+1)*.025);
+  // the smoker only comes out on and around the swarm, with room to work
+  const zone={l:r.left-240,r:r.right+200,t:r.top-160,b:r.bottom+120}, tb=tabs.getBoundingClientRect();
+  const onNav=mouse.y>tb.top-24&&mouse.x>tb.left-24&&mouse.x<tb.right+24;
+  overSwarm=vis&&fine&&!reduce&&!onNav&&mouse.x>zone.l&&mouse.x<zone.r&&mouse.y>zone.t&&mouse.y<zone.b;
+  // aim the nozzle at the swarm from wherever the hand is
+  const ax=cx-mouse.x, ay=cy-mouse.y, aim=Math.atan2(ay,ax)*180/Math.PI, al=Math.hypot(ax,ay)||1, dir={x:ax/al,y:ay/al};
+  // the smoker turns like a real object in the hand (a slow 3D turn), and only once the hand is clearly on the other side
+  if(overSwarm){ if(Math.abs(ax)>48) smS.side=ax>=0?1:-1; const wantFlip=smS.side; smS.turn+=((wantFlip>0?0:180)-smS.turn)*.075;
+    let want=wantFlip>0?aim+54:aim+126; want=((want+540)%360)-180; want=clamp(want,-140,140);
+    let dr=((want-smS.rot+540)%360)-180; smS.rot+=dr*.3; }
+  if(overSwarm&&mouse.down&&t-smS.lastPuff>(100+Math.random()*50)){ const nx=mouse.x, ny=mouse.y; puff(nx,ny,dir,Math.random()<.25); puff(nx+3,ny-2,dir,false); smS.lastPuff=t; }
+  else if(overSwarm&&Math.random()<.035){ const p=smokeImgs[(Math.random()*3)|0]; smoke.push({img:p,x:mouse.x,y:mouse.y+scrollY,vx:dir.x*.4+.1,vy:dir.y*.4-.3,rot:0,vr:.001,s:.05,gs:.0009,a:.22,life:1}); }
+  for(let i=smoke.length-1;i>=0;i--){ const s=smoke[i]; s.x+=s.vx+Math.sin(t/900+s.y/60)*.35; s.y+=s.vy; s.vy*=.997; s.vx*=.985; s.vy-=.004; s.rot+=s.vr; s.s+=s.gs; s.life-=.0042; if(s.life<=0){smoke.splice(i,1);continue;}
+    if(!s.img.complete||!s.img.naturalWidth) continue; const w=s.img.naturalWidth*s.s, h=s.img.naturalHeight*s.s, sy=s.y-scrollY; if(sy<-h||sy>H+h) continue;
+    fc.save(); fc.globalAlpha=s.a*Math.min(1,(1-s.life)*6)*s.life; fc.translate(s.x,sy); fc.rotate(s.rot); fc.drawImage(s.img,-w*.5,-h*.85,w,h); fc.restore(); }
+  swarmMix.vis=0; if(!vis) return;
+  swarmMix.vis=clamp(1-Math.abs((r.top+r.height/2)-H/2)/(H*.9),0,1);
+  let a=0; const sec=t/1000, inside=overSwarm;
+  let ox=0, oy=0;
+  if(swg){ const cw=Math.round(r.width*1.3*dpr), ch=Math.round(r.height*1.3*dpr); if(swc.width!==cw||swc.height!==ch){ swc.width=cw; swc.height=ch; }
+    ox=r.left-r.width*.15; oy=r.top-r.height*.15; fc=swg; fc.setTransform(dpr,0,0,dpr,0,0); fc.clearRect(0,0,cw,ch); }
+  const sdx=swAnchor?r.left-swAnchor.x:0, sdy=swAnchor?r.top-swAnchor.y:0; swAnchor={x:r.left,y:r.top};
+  for(const b of fly){
+    if(!b.x){ b.x=cx+(Math.random()-.5)*r.width*.3; b.y=cy+(Math.random()-.5)*r.height*.3; } else { b.x+=sdx; b.y+=sdy; }
+    let near=1e9; for(let j=smoke.length-1;j>=Math.max(0,smoke.length-40);j--){ const q=smoke[j]; if(!q.img.naturalWidth) continue; const rr=q.img.naturalWidth*q.s*.35; const d=Math.hypot(q.x-b.x,q.y-scrollY-q.img.naturalHeight*q.s*.35-b.y)-rr; if(d<near) near=d; }
+    if(near<10) b.calm=Math.min(1,b.calm+.03); else b.calm=Math.max(0,b.calm-.003);
+    b.a+=b.sp*(1-b.calm*.8); const R=(b.rad*(1-b.calm*.55))*r.width*.47;
+    const sy=Math.sin(b.a), taper=sy>0?1-sy*.68:1+(-sy)*.14;   // the bottom narrows to a point, the top stays broad
+    const hx=cx+Math.cos(b.a)*R*taper, hy=cy+sy*R*(sy>0?1.25:1.38)+Math.sin(sec*1.6+b.ph)*6*(1-b.calm);
+    let fx2=(hx-b.x)*.022, fy2=(hy-b.y)*.022;
+    if(inside){ const dx=b.x-mouse.x, dy=b.y-mouse.y, d=Math.hypot(dx,dy)||1; if(d<150){ const f=(1-d/150)*(1-b.calm*.85)*3.6; fx2+=dx/d*f; fy2+=dy/d*f; } }
+    b.vx=(b.vx+fx2)*.84; b.vy=(b.vy+fy2)*.84; if(!reduce&&fine){ b.x+=b.vx; b.y+=b.vy; } else { b.x=hx; b.y=hy; }   // touch screens: no smoker, so the bees just crawl on the drawn swarm, no springing while you scroll
+    a+=Math.hypot(b.vx,b.vy); steer(b.st,b.vx,b.vy,.18);
+    drawBee(b.img,b.x-ox,b.y-oy,b.s,b.st,.96,t,true); }
+  if(swg){ fc=fxc; fc.setTransform(dpr,0,0,dpr,0,0); }
+  agit+=((a/fly.length)-agit)*.05;
+  swarmMix.calm=fly.reduce((m,b)=>m+b.calm,0)/fly.length; swarmMix.agit=agit;
+}
+
+/* ---------------- footer: a wild meadow with the hound far off ---------------- */
+const foot=document.getElementById('foot'), fb=document.getElementById('footb'), ff=document.getElementById('footf'), fdog=document.getElementById('fdog'), fbee=document.getElementById('fbee');
+let footVis=false, fdw=0, fdh=0; const fbs={flip:1,tilt:0,x:0,y:0,vx:0,vy:0};
+new IntersectionObserver(es=>es.forEach(e=>footVis=e.isIntersecting),{threshold:0}).observe(foot);
+function drawFoot(){ if(!IM.meadow) return; const fw=foot.clientWidth, fh=foot.clientHeight; if(!fw||!fh) return;
+  const tmp=document.createElement('canvas'); tmp.width=Math.round(fw*dpr); tmp.height=Math.round(fh*dpr); const tc=tmp.getContext('2d');
+  [[fb,[[.74,.36,.42,.55],[.95,.46,.86,.4]]],[ff,[[1.1,.44,.96,0]]]].forEach(([cv,rows])=>{ cv.width=Math.round(fw*dpr); cv.height=Math.round(fh*dpr); const c=cv.getContext('2d'); c.setTransform(1,0,0,1,0,0); c.clearRect(0,0,cv.width,cv.height);
+    rows.forEach(([yb,hh,al,fade],ri)=>{ const h=fh*hh*1.6, w=h*IM.meadow.w/IM.meadow.h, top=fh*yb-h;
+      tc.setTransform(dpr,0,0,dpr,0,0); tc.globalCompositeOperation='source-over'; tc.clearRect(0,0,fw,fh);
+      let i=0; for(let x=(fw<760&&w>fw?-(w-fw)/2-ri*w*.12:-w*.2-ri*w*.37);x<fw+w;x+=w*.88,i++){ tc.save(); tc.translate(x+((i+ri)%2?w:0),top); tc.scale((i+ri)%2?-1:1,1); tc.drawImage(IM.meadow.im,0,0,w,h); tc.restore(); }
+      if(fade>0){ const y1=Math.min(fh,fh*yb), y0=y1-h*fade; const g=tc.createLinearGradient(0,y0,0,y1); g.addColorStop(0,'rgba(0,0,0,1)'); g.addColorStop(1,'rgba(0,0,0,0)');
+        tc.globalCompositeOperation='destination-in'; tc.fillStyle=g; tc.fillRect(0,0,fw,fh); }
+      c.globalAlpha=al; c.drawImage(tmp,0,0); c.globalAlpha=1; }); });
+  fdh=fh*.36; fdw=fdh*1595/730; fdog.style.width=fdw+'px'; }
+function tickFoot(t){ if(!footVis||!fdw) return; const fw=foot.clientWidth, fh=foot.clientHeight;
+  const dur=fw<760?(fw+fdw*2)/(fdw*.128)*1000:46000, k=reduce?.4:(((t+dur*.38)%dur)/dur), x=-fdw+k*(fw+fdw*2), ph=t/150, y=fh*.66-fdh*.28-Math.abs(Math.sin(ph))*4;
+  fdog.style.transform=`translate3d(${x}px,${y}px,0)`; fdog.style.opacity=1;
+  // the bee keeps the dog company but flies its own way: a lazy wander ahead of him, not his trot
+  const s=t/1000, base=fh*.66-fdh*.28, tx=x+fdw*(.9+Math.sin(s*.37)*.18)+Math.sin(s*1.13)*30, ty=base-fdh*.05+Math.sin(s*.71+1)*26+Math.sin(s*2.3)*6;
+  // the bee's wander is kept relative to the dog: when the pair loops back to the left edge it comes with him, no slingshot
+  const ox=tx-x;
+  if(!fbs.init){ fbs.init=1; fbs.x=ox; fbs.y=ty; fbs.vx=0; fbs.vy=0; }
+  fbs.vx=(fbs.vx+(ox-fbs.x)*.012)*.93; fbs.vy=(fbs.vy+(ty-fbs.y)*.012)*.93; fbs.x+=fbs.vx; fbs.y+=fbs.vy;
+  const dogV=(fw+fdw*2)/dur*16.7;
+  steer(fbs,fbs.vx+dogV,fbs.vy,.1); fbee.style.transform=`translate3d(${x+fbs.x}px,${fbs.y}px,0) scaleX(${fbs.flip}) rotate(${fbs.tilt}deg)`; fbee.style.opacity=1; }
+
+/* ---------------- input ---------------- */
+addEventListener('wheel',e=>{ if(scrollY<D && Math.abs(e.deltaX)>Math.abs(e.deltaY)){ e.preventDefault(); scrollBy(0,e.deltaX); } },{passive:false});
+addEventListener('keydown',e=>{ if(scrollY<D && (e.key==='ArrowRight'||e.key==='ArrowLeft')){ e.preventDefault(); scrollBy({top:(e.key==='ArrowRight'?1:-1)*W*.5,behavior:reduce?'auto':'smooth'}); } });
+
+/* ---------------- layout + loop ---------------- */
+const meadow=document.getElementById('meadow'), hint=document.getElementById('hint'), stage=document.getElementById('stage');
+function layout(){ W=innerWidth; H=innerHeight; U=Math.min(H,W*1.1); D=W*3.6; meadow.style.height=(D+H)+'px';
+  if(previewS){ meadow.style.display='none'; document.querySelectorAll('.room').forEach(r=>{ if(r.id!==previewS) r.style.display='none'; }); if(previewS!=='hi') foot.style.display='none'; }
+  sizeCanvas(back); sizeCanvas(front); sizeFx(); buildWorld(); placePhrases(); sizeHound(); buildTabs(); seedSwarm(); drawFoot(); placeLabel(); }
+window.__relayout=()=>{ measureStops(); placeLabel(); };
+let gust=0, lastT=0;
+function frame(t){
+  const dt=Math.min(.05,lastT?(t-lastT)/1000:.016); lastT=t;
+  const offT=previewX!=null?previewX*D:clamp(scrollY,0,D);
+  if(reduce||previewX!=null) off=offT; else off+=(offT-off)*.1;
+  offV=off-lastOff; lastOff=off; gust+=((reduce?0:clamp(offV/30,-1,1))-gust)*.06;
+  const p=D?off/D:0, d=smooth(clamp((p-.82)/.18,0,1));
+  world.slope=W<760?0:smooth(d)*.36; world.x0=W*.22; world.sink=smooth(clamp((p-.9)/.1,0,1));
+  const stageVis=scrollY<D+H;
+  { const past=clamp(scrollY-D,0,H), endF=smooth(clamp((scrollY-(D-H*.12))/(H*.62),0,1));
+    stage.style.opacity=(1-endF).toFixed(3); meadowFade=1-endF;
+    const mk=past>0?`linear-gradient(#000 0,#000 calc(100% - ${Math.round(past*1.25+40)}px),transparent 100%)`:'none';
+    stage.style.webkitMaskImage=mk; stage.style.maskImage=mk; }
+  if(stageVis){ drawLayer(back,piecesB,t,gust); drawLayer(front,piecesF,t,gust); tickType(t); tickHound(t,d); }
+  fc=mfc; fc.setTransform(dpr,0,0,dpr,0,0); fc.clearRect(0,0,W,H);
+  meadowHive.tick(t,dt);
+  fc=fxc; fc.setTransform(dpr,0,0,dpr,0,0); fc.clearRect(0,0,W,H);
+  tickRoam(t,dt); tickJar(t); tickSwarm(t); const evOn=eventsHive.tick(t,dt); tickFoot(t); tickTabs(t);
+  { const er=evHive.getBoundingClientRect(); const ev=evOn?clamp(1-Math.abs((er.top+er.height/2)-H/2)/(H*.8),0,1):0;
+    soundMix(t,{meadow:scrollY<D-H*.1,beeX:mb.x,swarm:swarmMix.vis,agit:swarmMix.agit,calm:swarmMix.calm,events:ev}); }
+  { const fr=foot.getBoundingClientRect(), show=fr.top<H*.85; credBtn.style.opacity=show?1:0; credBtn.style.pointerEvents=show?'auto':'none'; if(!show&&credPanel.classList.contains('open')){ credPanel.classList.remove('open'); credBtn.setAttribute('aria-expanded',false); } }   // credits only show at the end of the page
+  document.body.classList.toggle('smoking',overSwarm);
+  if(fine&&!reduce){
+    cur.style.transform=`translate3d(${mouse.x-29}px,${mouse.y-29}px,0) scaleX(${cst.flip}) rotate(${cst.tilt}deg)`; steer(cst,mouse.vx,mouse.vy,.2);
+    smS.squeeze+=((mouse.down&&overSwarm?1:0)-smS.squeeze)*.25;
+    const pulse=mouse.down&&overSwarm?Math.abs(Math.sin(t/110))*.05:0;
+    smk.style.transform=`translate3d(${mouse.x}px,${mouse.y}px,0) rotate(${smS.rot+Math.sin(t/520)*1.5}deg)`;
+    smkTurn.style.transform=`perspective(520px) rotateY(${smS.turn}deg) rotateX(${Math.sin(smS.turn*Math.PI/180)*8}deg)`;
+    smkImg.style.transform=`scale(${1-pulse*.4},${1-pulse})`;
+  }
+  mouse.vx*=.8; mouse.vy*=.8;
+  requestAnimationFrame(frame);
+}
+const cst={flip:1,tilt:0};
+const start=()=>{ scrollTo(0,0); layout(); intro0=performance.now();
+  loadImages(()=>{ upload(back); upload(front); buildWorld(); drawFoot(); });
+  if(previewSmoke){ setTimeout(()=>{ const r=swarmArt.getBoundingClientRect(); mouse.x=r.left-60; mouse.y=r.top+r.height*.5; mouse.down=true; let n=0;
+    const fake=()=>{ mouse.x+=Math.sin(n/14)*1.4; mouse.y+=Math.cos(n/20)*.8; if(++n<260) requestAnimationFrame(fake); }; fake(); },200); }
+  requestAnimationFrame(frame); };
+document.fonts.ready.then(start);
+let rz; addEventListener('resize',()=>{ if(innerWidth===W && Math.abs(innerHeight-H)<160) return; clearTimeout(rz); rz=setTimeout(()=>{ dpr=Math.min(1.5,devicePixelRatio||1); layout(); },120); });
+
+addEventListener('load',()=>{ measureStops(); placeLabel(); });
+document.getElementById('jar').addEventListener('load',placeLabel);
+})();
+</script>
+</body>
+</html>

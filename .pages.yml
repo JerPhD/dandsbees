@@ -1,0 +1,37 @@
+content:
+  - name: words
+    label: Website words
+    type: file
+    path: _data/content.yml
+    format: yaml
+    fields:
+      - name: email
+        label: Email address (used on every button)
+        type: string
+      - name: honey
+        label: Honey
+        type: object
+        fields:
+          - { name: intro, label: Paragraph, type: text }
+          - { name: order, label: Highlighted line, type: string }
+          - { name: pickup, label: Small line under it, type: string }
+      - name: swarms
+        label: Swarms
+        type: object
+        fields:
+          - { name: paragraph, label: Paragraph, type: text }
+          - { name: removal, label: Second paragraph (italic), type: text }
+      - name: events
+        label: Events
+        type: object
+        fields:
+          - { name: visits, label: First paragraph, type: text }
+          - { name: classes, label: Second paragraph, type: text }
+          - { name: ask, label: Highlighted line, type: string }
+      - name: about
+        label: About
+        type: object
+        fields:
+          - { name: story, label: Paragraph, type: text }
+          - { name: photo_1, label: Caption under the first photo, type: string }
+          - { name: photo_2, label: Caption under the second photo, type: string }
