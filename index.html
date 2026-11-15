@@ -8,6 +8,16 @@
 <meta name="format-detection" content="telephone=no, email=no, address=no">
 <title>Dan D's Bees · Raw wildflower honey, San Francisco</title>
 <link rel="icon" href="images/favicon.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://dandsbees.com/">
+<meta property="og:title" content="Dan D's Bees · Raw wildflower honey, San Francisco">
+<meta property="og:description" content="Raw wildflower honey from San Francisco hives. Swarm calls, hive removal, school visits and beekeeping classes with Dan D.">
+<meta property="og:image" content="https://dandsbees.com/images/share.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The Dan D's Bees honey label: a dog beside a beehive in a meadow">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://dandsbees.com/images/share.jpg">
 <meta name="description" content="Raw wildflower honey from San Francisco hives. Swarm calls, hive removal, school visits and beekeeping classes with Dan D.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -139,8 +149,8 @@ p + p{margin-top:14px}
 
 /* honey: the label sits on the jar */
 .jarwrap{max-width:530px;justify-self:start;margin-left:-24px}
-.jarlabel{position:absolute;left:0;top:0;width:300px;height:330px;transform-origin:0 0;background:#f6efe2 url(images/paper.jpg);background-size:420px;border-radius:2px;
-  box-shadow:0 0 0 .6px rgba(42,38,34,.22),inset 0 0 22px rgba(201,138,20,.12);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:50px 8px 20px;
+.jarlabel{position:absolute;left:0;top:0;width:360px;height:300px;overflow:hidden;transform-origin:0 0;background:#f6efe2 url(images/paper.jpg);background-size:420px;border-radius:2px;
+  box-shadow:0 0 0 .6px rgba(42,38,34,.22),inset 0 0 22px rgba(201,138,20,.12);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:0;
   text-align:center;opacity:0;transition:opacity 1s .5s;pointer-events:none}
 .jarwrap .inkin.in ~ .jarlabel{opacity:.95}
 body.still .jarlabel{opacity:.95}
@@ -298,7 +308,7 @@ if(/CriOS/.test(navigator.userAgent)) document.documentElement.classList.add('cr
     </div>
     <div class="art jarwrap" id="jarwrap">
       <img class="inkin" id="jar" src="images/honey-jar.webp" alt="A jar of raw wildflower honey, painted in ink with a golden wash">
-      <div class="jarlabel" id="jarlabel"><img src="images/dog-and-hive-label.webp" alt=""><b>Dan D's Bees</b><i>Raw wildflower honey</i><u><em>From an SF home kitchen</em>{{ site.data.content.email | escape }}</u></div>
+      <div class="jarlabel" id="jarlabel"><img src="images/honey-label.webp" alt="The honey label: Dan D's Bees, raw wildflower honey"></div>
     </div>
   </section>
 
@@ -502,8 +512,8 @@ function buildWorld(){
   const S=W<760?Math.min(H*.85,W*1.85):H;
   const G=W<760?H-74:H;   // on a phone the ground is lifted clear of the nav   // on a phone the plants are sized to the width, so a poppy never fills the screen
   const add=(arr,tex,x,yb,h,par,o)=>{ const T=IM[tex]; const w=h*T.w/T.h; const p=Object.assign({tex,x,yb,h,w,par,flip:1,amp:2,alpha:1,sd:rnd()*40,rev:0,ground:false},o||{}); arr.push(p); return p; };
-  let lay=0; const tile=(arr,h,yb,par,from,to,o)=>{ const w=h*IM.meadow.w/IM.meadow.h; lay++; const ph=W<760?[0,.47,.21,.73][lay%4]*w:0;
-    for(let x=from-ph,i=0;x<to;i++){ const j=W<760?((i*37+lay*11)%10)/10:0; add(arr,'meadow',x,yb+(W<760?(j-.5)*h*.06:0),h,par,Object.assign({flip:W<760?((i*7+3+lay)%5<2?-1:1):(i%2?-1:1),ground:true},o)); x+=w*(W<760?.66+j*.3:.88); } };
+  let lay=0; const tile=(arr,h,yb,par,from,to,o)=>{ const w=h*IM.meadow.w/IM.meadow.h; lay++; const ph=[0,.47,.21,.73][lay%4]*w;   // 11-14: no copy is ever mirrored (a flipped copy beside an unflipped one folds into an inkblot); irregular offsets, spacing and height hide the repeat
+    for(let x=from-ph,i=0;x<to;i++){ const j=((i*37+lay*11)%10)/10; add(arr,'meadow',x,yb+(j-.5)*h*(W<760?.06:.04),h,par,Object.assign({flip:1,ground:true},o)); x+=w*(W<760?.66+j*.3:.84+j*.13); } };
   // flowers behind: raised, lighter, slower
   tile(piecesB,S*.34,G*.89,.55,-W*.4,D*.55+W*1.6,{alpha:.32,amp:1.2,layer:0,fadeB:.7});
   // the main meadow: raised so the hound walks in it
@@ -513,7 +523,7 @@ function buildWorld(){
   hivePiece=add(piecesB,'hive',.47*D+W*.66,G*.99,U*.72,1,{amp:.6,layer:.9});
   { const hx=hivePiece.x, hw=hivePiece.w;   // a taller drift of flowers behind the hive, so it sits in the meadow instead of on a ledge
     // just enough to close the gap where the field dropped away behind the hive: one soft, pale strip on its far side
-    add(piecesB,'meadow',hx+hw*.55,G*1.0,S*.54,1,{flip:-1,amp:2,layer:.85,alpha:.42}); }
+    add(piecesB,'meadow',hx+hw*.55,G*1.0,S*.54,1,{flip:1,amp:2,layer:.85,alpha:.2}); }   // 11-14: unflipped, so it never mirrors the field behind it
   // poppies in pairs from the same plant, set in the far back: they drift slower than the meadow and sit lower in it
   [[.13,.58],[.36,.62],[.62,.56],[.88,.6]].forEach(([at,s0],i)=>{ const s=s0*(W<760?.78:1);   // a little smaller on phones
     const x=at*D*.75+W*(.95+i*.05)-(i===1?W*.13:0);   // the keeper's pair steps left so the hive has room
@@ -610,6 +620,15 @@ let scrollAnim=null;
 ['touchstart','wheel'].forEach(ev=>addEventListener(ev,()=>cancelAnimationFrame(scrollAnim),{passive:true}));   // a tap on the nav glides; a finger takes over
 function flyTo(i){ measureStops(); const y=Math.max(0,stopY[i]); if(reduce){scrollTo(0,y);return;} const y0=scrollY,dd=y-y0,dur=Math.min(2600,600+Math.abs(dd)*.18),ts=performance.now(); cancelAnimationFrame(scrollAnim);
   const step=t=>{ const k=Math.min(1,(t-ts)/dur), e=k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2; scrollTo(0,y0+dd*e); if(k<1) scrollAnim=requestAnimationFrame(step); }; scrollAnim=requestAnimationFrame(step); }
+/* 11-14 (Ivy): the lightest slowdown at each section, never a bounce. While a wheel or trackpad scroll passes a section,
+   it simply moves a little slower (down to about half speed right at the reveal), so the section lingers, then it's back
+   to full speed. Nothing moves on its own when you stop. Phones keep their native scroll */
+addEventListener('wheel',e=>{ if(reduce||e.ctrlKey||!stopY.length) return;
+  const y=scrollY, band=innerHeight*.34; let bd=1e9;
+  stopY.forEach((sy,i)=>{ if(i===0||STOPS[i][0]==='hi') return; const d=Math.abs(sy-y); if(d<bd) bd=d; });
+  if(bd>=band) return;
+  const k=bd/band, f=.42+.58*Math.pow(k,1.6), dy=e.deltaY*(e.deltaMode===1?16:e.deltaMode===2?innerHeight:1);
+  e.preventDefault(); cancelAnimationFrame(scrollAnim); scrollBy(0,dy*f); },{passive:false});
 function tickTabs(t){ if(!tabX.length) return;
   /* Contact is the bottom of the page, measured live: the reachable bottom moves as the browser bars hide and come back */
   if(STOPS[STOPS.length-1][0]==='hi'){ const n=stopY.length-1; stopY[n]=Math.max(stopY[n-1]+1,document.documentElement.scrollHeight-innerHeight-24); }
@@ -715,14 +734,14 @@ function tickRoam(t,dt){ if(!roam.length) return; const a=clamp((scrollY-D)/(H*.
 /* honey label: a fixed card mapped onto the jar's front face with a projective transform */
 const jarLabel=document.getElementById('jarlabel'), jarWrap=document.getElementById('jarwrap');
 // front face corners on honey-jar.webp (870x1100), and the label's place inside that face
-const FACE=[[360,582],[650,546],[644,846],[364,884]], LU=[.1,.9], LV=[.1,.9];
+const FACE=[[360,582],[650,546],[644,846],[364,884]], LU=[.1,.9], LV=[.18,.82];
 function homography(src,dst){ const A=[],b=[]; for(let i=0;i<4;i++){ const [x,y]=src[i],[u,v]=dst[i]; A.push([x,y,1,0,0,0,-u*x,-u*y]); b.push(u); A.push([0,0,0,x,y,1,-v*x,-v*y]); b.push(v); }
   for(let i=0;i<8;i++){ let m=i; for(let r=i+1;r<8;r++) if(Math.abs(A[r][i])>Math.abs(A[m][i])) m=r; [A[i],A[m]]=[A[m],A[i]]; [b[i],b[m]]=[b[m],b[i]];
     for(let r=0;r<8;r++){ if(r===i) continue; const f=A[r][i]/A[i][i]; for(let c=i;c<8;c++) A[r][c]-=f*A[i][c]; b[r]-=f*b[i]; } }
   const h=b.map((v,i)=>v/A[i][i]); return [h[0],h[3],0,h[6], h[1],h[4],0,h[7], 0,0,1,0, h[2],h[5],0,1]; }
 function placeLabel(){ const img=document.getElementById('jar'); const w=img.clientWidth; if(!w) return; const k=w/870;
   const pt=(u,v)=>{ const top=[lerp(FACE[0][0],FACE[1][0],u),lerp(FACE[0][1],FACE[1][1],u)], bot=[lerp(FACE[3][0],FACE[2][0],u),lerp(FACE[3][1],FACE[2][1],u)]; return [lerp(top[0],bot[0],v)*k,lerp(top[1],bot[1],v)*k]; };
-  const dst=[pt(LU[0],LV[0]),pt(LU[1],LV[0]),pt(LU[1],LV[1]),pt(LU[0],LV[1])], lw=300, lh=330;
+  const dst=[pt(LU[0],LV[0]),pt(LU[1],LV[0]),pt(LU[1],LV[1]),pt(LU[0],LV[1])], lw=360, lh=300;
   jarLabel.style.transform='matrix3d('+homography([[0,0],[lw,0],[lw,lh],[0,lh]],dst).map(v=>+v.toFixed(8)).join(',')+')'; }
 
 /* the swarm, calmed by ink smoke from a smoker that turns to face it */
@@ -787,7 +806,8 @@ function drawFoot(){ if(!IM.meadow) return; const fw=foot.clientWidth, fh=foot.c
   [[fb,[[.74,.36,.42,.55],[.95,.46,.86,.4]]],[ff,[[1.1,.44,.96,0]]]].forEach(([cv,rows])=>{ cv.width=Math.round(fw*dpr); cv.height=Math.round(fh*dpr); const c=cv.getContext('2d'); c.setTransform(1,0,0,1,0,0); c.clearRect(0,0,cv.width,cv.height);
     rows.forEach(([yb,hh,al,fade],ri)=>{ const h=fh*hh*1.6, w=h*IM.meadow.w/IM.meadow.h, top=fh*yb-h;
       tc.setTransform(dpr,0,0,dpr,0,0); tc.globalCompositeOperation='source-over'; tc.clearRect(0,0,fw,fh);
-      let i=0; for(let x=(fw<760&&w>fw?-(w-fw)/2-ri*w*.12:-w*.2-ri*w*.37);x<fw+w;x+=w*.88,i++){ tc.save(); tc.translate(x+((i+ri)%2?w:0),top); tc.scale((i+ri)%2?-1:1,1); tc.drawImage(IM.meadow.im,0,0,w,h); tc.restore(); }
+      let i=0; for(let x=(fw<760&&w>fw?-(w-fw)/2-ri*w*.12:-w*.2-ri*w*.37);x<fw+w;i++){ const j=((i*37+ri*11+5)%10)/10, fl=false;   // 11-14: irregular flips, spacing and height, so no two neighbours mirror into an inkblot
+        tc.save(); tc.translate(x+(fl?w:0),top+(j-.5)*h*.04); tc.scale(fl?-1:1,1); tc.drawImage(IM.meadow.im,0,0,w,h); tc.restore(); x+=w*(.72+j*.24); }
       if(fade>0){ const y1=Math.min(fh,fh*yb), y0=y1-h*fade; const g=tc.createLinearGradient(0,y0,0,y1); g.addColorStop(0,'rgba(0,0,0,1)'); g.addColorStop(1,'rgba(0,0,0,0)');
         tc.globalCompositeOperation='destination-in'; tc.fillStyle=g; tc.fillRect(0,0,fw,fh); }
       c.globalAlpha=al; c.drawImage(tmp,0,0); c.globalAlpha=1; }); });
