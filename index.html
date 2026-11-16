@@ -7,7 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="format-detection" content="telephone=no, email=no, address=no">
 <title>Dan D's Bees · Raw wildflower honey, San Francisco</title>
-<link rel="icon" href="images/favicon.png">
+<link rel="icon" href="images/favicon.png?v=3" sizes="64x64">
+<link rel="icon" href="images/favicon-bee-3.svg" type="image/svg+xml">   <!-- 11-16: follows light / dark system mode (a cream tile in dark) -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://dandsbees.com/">
 <meta property="og:title" content="Dan D's Bees · Raw wildflower honey, San Francisco">
@@ -152,8 +153,8 @@ p + p{margin-top:14px}
 .jarlabel{position:absolute;left:0;top:0;width:360px;height:300px;overflow:hidden;transform-origin:0 0;background:#f6efe2 url(images/paper.jpg);background-size:420px;border-radius:2px;
   box-shadow:0 0 0 .6px rgba(42,38,34,.22),inset 0 0 22px rgba(201,138,20,.12);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:0;
   text-align:center;opacity:0;transition:opacity 1s .5s;pointer-events:none}
-.jarwrap .inkin.in ~ .jarlabel{opacity:.95}
-body.still .jarlabel{opacity:.95}
+.jarwrap .inkin.in ~ .jarlabel{opacity:1}
+body.still .jarlabel{opacity:1}
 .jarlabel img{width:100%;height:auto;display:block}
 .jarlabel b{display:block;font-family:var(--fd);font-weight:var(--dw);font-size:40px;line-height:.95;color:var(--ink);white-space:nowrap;margin-top:10px}
 .jarlabel i{display:block;font-family:var(--fu);font-style:normal;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink2);white-space:nowrap;margin-top:7px}
@@ -178,7 +179,7 @@ body.still .jarlabel{opacity:.95}
 /* about: the hound by the hive, and Dan's own prints */
 .room.about{grid-template-columns:minmax(0,600px) minmax(0,640px)}   /* same columns as Swarms, so the two line up */
 .about .art{max-width:none;width:calc(100% + min(168px,8vw) + 50px);margin-left:calc(-1 * min(168px,8vw));justify-self:start}   /* reaches out into the left margin; keeps ~90px before the text */
-.jarlabel img{mix-blend-mode:multiply}   /* the label art is on white, so it melts into the label paper */
+.jarlabel img{mix-blend-mode:normal;filter:brightness(.965)}   /* 11-16 (Ivy): the printed label's own cream; multiplying it over the paper went too dark */
 .prints{display:flex;gap:22px;margin-top:28px;align-items:flex-start}
 .print{display:block;width:220px;background:#fbf7ee;padding:10px 10px 32px;box-shadow:0 10px 26px rgba(42,38,34,.10)}
 .print:first-child{transform:rotate(2deg)} .print:last-child{transform:rotate(-2.4deg) translateY(14px)}
@@ -741,7 +742,8 @@ function homography(src,dst){ const A=[],b=[]; for(let i=0;i<4;i++){ const [x,y]
   const h=b.map((v,i)=>v/A[i][i]); return [h[0],h[3],0,h[6], h[1],h[4],0,h[7], 0,0,1,0, h[2],h[5],0,1]; }
 function placeLabel(){ const img=document.getElementById('jar'); const w=img.clientWidth; if(!w) return; const k=w/870;
   const pt=(u,v)=>{ const top=[lerp(FACE[0][0],FACE[1][0],u),lerp(FACE[0][1],FACE[1][1],u)], bot=[lerp(FACE[3][0],FACE[2][0],u),lerp(FACE[3][1],FACE[2][1],u)]; return [lerp(top[0],bot[0],v)*k,lerp(top[1],bot[1],v)*k]; };
-  const dst=[pt(LU[0],LV[0]),pt(LU[1],LV[0]),pt(LU[1],LV[1]),pt(LU[0],LV[1])], lw=360, lh=300;
+  const T=4*k;   // 11-16 (Ivy): a touch less slope: the left side up, the right side down
+  const dst=[pt(LU[0],LV[0]),pt(LU[1],LV[0]),pt(LU[1],LV[1]),pt(LU[0],LV[1])].map((p,i)=>[p[0],p[1]+(i===0||i===3?-T:T)]), lw=360, lh=300;
   jarLabel.style.transform='matrix3d('+homography([[0,0],[lw,0],[lw,lh],[0,lh]],dst).map(v=>+v.toFixed(8)).join(',')+')'; }
 
 /* the swarm, calmed by ink smoke from a smoker that turns to face it */
